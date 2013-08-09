@@ -1,0 +1,21 @@
+[manage]
+passwd=secret
+immpasswd: %(passwd)s
+dracpasswd: %(passwd)s
+cbmcpasswd: %(passwd)s
+bladepasswd: %(passwd)s
+
+user=USERID
+immuser: %(user)s
+bladeuser: %(user)s
+
+
+[icinga]
+##icinga commands
+host: stevinm.ugent.be
+socketfile: /var/icinga/rw/icinga.cmd
+comment: added by ash on users request
+
+[quattor]
+#should end in /
+path: /var/www/https/profiles/
