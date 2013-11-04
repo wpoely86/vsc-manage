@@ -30,18 +30,16 @@ Created on Oct 18, 2011
 '''
 import os
 import traceback
-import unittest
+from unittest import TestCase, TestLoader
 from vsc.manage.config import Options, get_config
 from vsc.manage.manage import Manager
 from vsc.manage.clusters import Cluster, NoSuchClusterException
 from vsc.manage.nodes import NodeException
-#from vsc.utils import fancylogger
-#fancylogger.logToScreen()
 
 QUATTOR_PATH = get_config("QUATTOR_PATH")
 
 
-class TestClusters(unittest.TestCase):
+class ManageTest(TestCase):
 
     def setUp(self):
         pass
@@ -167,11 +165,11 @@ class TestClusters(unittest.TestCase):
             pass
         else:
             self.fail("manager didn't fail with a NodeException when an unknown node was selected")
-        opts.node = 'node601,605,magikarp'
+        opts.node = 'node613,610,magikarp'
         Manager(opts)
-        opts.node = 'node603-node605'
+        opts.node = 'node613-node615'
         Manager(opts)
-        opts.node = 'node601,node603-node605,magikarp'
+        opts.node = 'node610,node613-node615,magikarp'
         Manager(opts)
 
     def testManagerCreatorNodeOptions(self):
@@ -209,9 +207,9 @@ class TestClusters(unittest.TestCase):
         #self.assertRaises(Exception, Manager, opts)
         manager = Manager(opts)
         self.assertFalse(manager.hasSpecials())
-        opts.all = True
+        opts.all_nodes = True
         manager = Manager(opts)
-        self.assertTrue(manager.hasSpecials())  # should have special nodes (the master)
+        self.assertTrue(manager.hasSpecials())  # should have special nodes with force (the master)
 
         opts = Options()
         opts.cluster = 'cubone'
@@ -236,9 +234,8 @@ class TestClusters(unittest.TestCase):
         """
         opts = Options()  # default options object
         opts.cluster = 'cubone'
-        opts.node = 'node610'
+        opts.node = 'node613'
         opts.setonline = True
-        #TODO: fails, since no worker nodes can be found
         Manager(opts).doit()
 
     def testManagerLEDs(self):
@@ -344,7 +341,6 @@ class TestClusters(unittest.TestCase):
         print "showcommands", manager.nodes.showCommands()
         self.assertFalse(bool(manager.nodes.showCommands()))
 
-
     def testManagerCreatorActionOptions(self):
         """
         test the manager constructor
@@ -400,5 +396,6 @@ class TestClusters(unittest.TestCase):
         Manager(opts).doit()  # should create a manager
 
 
-if __name__ == "__main__":
-    unittest.main()
+def suite():
+    """ returns all the testcases in this module """
+    return TestLoader().loadTestsFromTestCase(ManageTest)
