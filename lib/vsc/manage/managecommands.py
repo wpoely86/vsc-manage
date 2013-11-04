@@ -102,10 +102,10 @@ class Command(object):
         self.timeout = float(timeout)
 
     def __str__(self):
-        return str(self.getCommand())
+        return "going to run on %s: %s" % (self.host, str(self.getCommand()))
 
     def __repr__(self):
-        return str(self.getCommand())
+        return "going to run on %s: %s" % (self.host, str(self.getCommand()))
 
     def getCommand(self):
         """
@@ -824,7 +824,7 @@ class IpmiCommand(Command):
 
         command = "ipmitool -I lanplus -H %s -U %s -P '%s' chassis power %s" % \
             (hostname, user, get_config("CBMCPASSWD"), command)
-        Command.__init__(self, command, host=hostname)
+        Command.__init__(self, command)
 
 
 class IpmiPoweroffCommand(IpmiCommand):

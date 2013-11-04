@@ -196,7 +196,7 @@ class Manager(object):
                 self.log.debug("found master specifier %s" % tnodes)
                 for nodeid in tnodes:
                     try:
-                        masters = cluster.getMasters()
+                        masters = cluster._getMasters()
                         self.log.debug('got masters %s' % masters)
 
                         self.log.debug('getting masters %s' % nodeid)

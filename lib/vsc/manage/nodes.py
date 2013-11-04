@@ -529,7 +529,7 @@ class CompositeNode(Node):
         keys = self.nodes.keys()
         keys.sort()
         sortedl = map(self.nodes.get, keys)
-        #self.log.debug("sorted keys: %s"%sorted)
+        self.log.debug("sorted keys: %s"%sorted)
         return sortedl
 
     def getStatus(self, forced=False, threaded=True, group_by_chassis=False):
