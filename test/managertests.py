@@ -105,8 +105,9 @@ class ManageTest(TestCase):
 
         clusternames = set([s.split('.')[1] for s in os.listdir(QUATTOR_PATH)])  # get names from the files in the quattor dir
         for name in clusternames:
-            #TODO: ticket 712, add support for non clustered devices
-            if name != 'ugent':
+            #TODO: add support for non clustered devices: https://github.com/hpcugent/vsc-manage/issues/1
+            # ignore unsupported 'clusters'
+            if name not in ('ugent', 'gligar', 'muk'):
                 self.clustertest(name)
 
     def testManagerCreatorNodesFromChassis(self):

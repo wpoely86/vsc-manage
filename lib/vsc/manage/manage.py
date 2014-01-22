@@ -296,6 +296,7 @@ class Manager(object):
         txt += '-' * len(txt) + "\n"
         statusses = self.nodes.getStatus(forced=False, threaded=(not self.options.non_threaded), group_by_chassis=self.group_by_chassis)
         # parse results
+        errors = {}
         for status in statusses:
             node = status[0]
             result = None
@@ -303,9 +304,22 @@ class Manager(object):
                 result = [x[0] for x in status[1]]
             except (IndexError, TypeError):
                 self.log.info("failed to parse status of %s: %s" % (node, status))
+
+            # keep track of errors
+            try:
+                errors[node] = [x[1] for x in status[1]]
+            except (IndexError, TypeError):
+                # no errors is a normal case
+                pass
+
             # get nodename
-            self.log.debug("GetStatus: calling getChassis()")
             txt += "%-7s %-19s %-16s %s\n" % (node.nodeid, node.getChassis(), node.getSlot(), result)
+
+        # print errors
+        if errors:
+            txt += "Errors occured:\n    "
+            txt += "\n    ".join(["%s: %s" % (x, errors[x]) for x in sorted(errors.keys())])
+            txt += "\n"
         self.log.info("getStatus in master: %s" % txt)
         print txt
 
