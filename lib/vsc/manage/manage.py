@@ -318,7 +318,7 @@ class Manager(object):
         # print errors
         if errors:
             txt += "Errors occured:\n    "
-            txt += "\n    ".join(["%s: %s" % (x, y) for x, y in errors.items()])
+            txt += "\n    ".join(["%s: %s" % (x, errors[x]) for x in sorted(errors.keys())])
             txt += "\n"
         self.log.info("getStatus in master: %s" % txt)
         print txt
