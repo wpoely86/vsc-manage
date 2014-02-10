@@ -51,9 +51,9 @@ from managecommands import BladeSoftPoweroffCommand, BladePoweronCommand, \
     DracPoweronCommand, DracPoweroffCommand, DracRebootCommand, \
     DracFullStatusCommand, IpmiFullStatusCommand, IpmiPoweronCommand, \
     IpmiPoweroffCommand, IpmiSoftPoweroffCommand, IpmiRebootCommand, \
-    ImmSoftPoweroffCommand, ImmPoweronCommand, ImmPoweroffCommand, ImmRebootCommand, \
+    ImmPoweronCommand, ImmPoweroffCommand, ImmRebootCommand, \
     FullImmStatusCommand, MoabPauseCommand, MoabResumeCommand, MoabRestartCommand, \
-    ImmSoftRebootCommand, Worker, NotSupportedCommand, DMTFSMASHCLPLEDOnCommand, \
+    Worker, NotSupportedCommand, DMTFSMASHCLPLEDOnCommand, \
     DMTFSMASHCLPLEDOffCommand, FixDownOnErrorCommand
 
 
@@ -1105,11 +1105,11 @@ class ImmNode(Node):
             'clustername': self.clustername,
         }
         self.statusCommand = FullImmStatusCommand(host, adminhost, self.getMaster())
-        self.softpoweroffCommand = ImmSoftPoweroffCommand(adminhost)
+        self.softpoweroffCommand = SoftPoweroffCommand(adminhost)
         self.poweronCommand = ImmPoweronCommand(adminhost)
         self.poweroffCommand = ImmPoweroffCommand(adminhost)
         self.rebootCommand = ImmRebootCommand(adminhost)
-        self.softrebootCommand = ImmSoftRebootCommand(adminhost)
+        self.softrebootCommand = SoftRebootCommand(adminhost)
         self.ledoffcommand = NotSupportedCommand("ledoff")
         self.ledoncommand = NotSupportedCommand("ledon")
 
