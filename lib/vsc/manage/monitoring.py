@@ -130,8 +130,9 @@ class Icinga(Monitoring):
             comment = get_config("ICINGA_DEFAULT_COMMENT")
 
         for node in self.nodelist:
+            hostname = get_config('ICINGA_HOSTNAME') % node.hostname
             commands.append('echo "%s" > %s' % (get_config("ICINGA_ACKNOWLEDGE_HOST_PROBLEM") % {
-                'host_name': node.hostname, 'timestamp': starttime - 1, 'comment': comment,
+                'host_name': hostname, 'timestamp': starttime - 1, 'comment': comment,
                 'clustername': node.clustername
             }, get_config("ICINGA_SOCKET")))
             if self.imms and node.immmonitoring:
@@ -157,8 +158,9 @@ class Icinga(Monitoring):
             comment = get_config("ICINGA_DEFAULT_COMMENT")
 
         for node in self.nodelist:
+            hostname = get_config('ICINGA_HOSTNAME') % node.hostname
             ack_command = get_config("ICINGA_ACKNOWLEDGE_SERVICE_PROBLEM") % {
-                'host_name': node.hostname,
+                'host_name': hostname,
                 'timestamp': starttime - 1,
                 'comment': comment,
                 'clustername': node.clustername,

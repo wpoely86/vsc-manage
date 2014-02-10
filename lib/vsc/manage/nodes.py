@@ -529,7 +529,7 @@ class CompositeNode(Node):
         keys = self.nodes.keys()
         keys.sort()
         sortedl = map(self.nodes.get, keys)
-        self.log.debug("sorted keys: %s"%sorted)
+        self.log.debug("sorted keys: %s" % sorted)
         return sortedl
 
     def getStatus(self, forced=False, threaded=True, group_by_chassis=False):
@@ -1052,7 +1052,10 @@ class BladeNode(Node):
         self.shassishost = get_config('CHASIS_HOST_TPL') % {'chasisname': self.getChassis(),
                                                             'clustername': self.clustername}
         self.immname = self.chassisname
-        self.immmonitoring = get_config('ICINGA_BLADE_IMM_TPL') % {'chassisname': self.chassisname}
+        self.immmonitoring = get_config('ICINGA_BLADE_IMM_TPL') % {
+            'chassisname': self.chassisname,
+            'clustername': self.clustername,
+        }
 
         self.softpoweroffCommand = BladeSoftPoweroffCommand(chassisname=self.shassishost,
                                                             slot=self.slot)
@@ -1097,7 +1100,10 @@ class ImmNode(Node):
         self.log.debug("creating ImmNode")
         host = self.hostname
         adminhost = self.immname
-        self.immmonitoring = get_config('ICINGA_IDPX_IMM_TPL') % {'nodeid': self.nodeid}
+        self.immmonitoring = get_config('ICINGA_IDPX_IMM_TPL') % {
+            'nodeid': self.nodeid,
+            'clustername': self.clustername,
+        }
         self.statusCommand = FullImmStatusCommand(host, adminhost, self.getMaster())
         self.softpoweroffCommand = ImmSoftPoweroffCommand(adminhost)
         self.poweronCommand = ImmPoweronCommand(adminhost)
