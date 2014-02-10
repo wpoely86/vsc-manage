@@ -62,7 +62,7 @@ PACKAGE = {
     'install_requires': [
         'libxml2-python',
         'paramiko',
-        'pycrypto >= 2.1',
+        'pycrypto >= 1.9',
     ],
 }
 
