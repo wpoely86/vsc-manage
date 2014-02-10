@@ -130,15 +130,22 @@ class Icinga(Monitoring):
             comment = get_config("ICINGA_DEFAULT_COMMENT")
 
         for node in self.nodelist:
-            hostname = get_config('ICINGA_HOSTNAME') % node.hostname
-            commands.append('echo "%s" > %s' % (get_config("ICINGA_ACKNOWLEDGE_HOST_PROBLEM") % {
-                'host_name': hostname, 'timestamp': starttime - 1, 'comment': comment,
+            tpldict = {
+                'host_name': node.hostname,
+                'timestamp': starttime - 1,
+                'comment': comment,
                 'clustername': node.clustername
-            }, get_config("ICINGA_SOCKET")))
+            },
+            tpldict['host_name'] = get_config('ICINGA_HOSTNAME') % tpldict
+            ack_command = 'echo "%s" > %s' % (get_config("ICINGA_ACKNOWLEDGE_HOST_PROBLEM") % tpldict)
+            commands.append(ack_command, get_config("ICINGA_SOCKET"))
             if self.imms and node.immmonitoring:
                 commands.append('echo "%s" > %s' % (get_config("ICINGA_ACKNOWLEDGE_HOST_PROBLEM") % {
-                                'host_name': node.immmonitoring, 'timestamp': starttime - 1, 'comment': comment,
-                                'clustername': node.clustername}, get_config("ICINGA_SOCKET")))
+                    'host_name': node.immmonitoring,
+                    'timestamp': starttime - 1,
+                    'comment': comment,
+                    'clustername': node.clustername,
+                }, get_config("ICINGA_SOCKET")))
 
         command = ";".join(commands)
         self.log.debug("creating command %s" % command)
@@ -158,14 +165,16 @@ class Icinga(Monitoring):
             comment = get_config("ICINGA_DEFAULT_COMMENT")
 
         for node in self.nodelist:
-            hostname = get_config('ICINGA_HOSTNAME') % node.hostname
-            ack_command = get_config("ICINGA_ACKNOWLEDGE_SERVICE_PROBLEM") % {
-                'host_name': hostname,
+            tpldict = {
+                'host_name': node.hostname,
                 'timestamp': starttime - 1,
                 'comment': comment,
                 'clustername': node.clustername,
                 'service': servicename
             }
+            # apply icinga templating to hostname
+            tpldict['host_name'] = get_config('ICINGA_HOSTNAME') % tpldict
+            ack_command = get_config("ICINGA_ACKNOWLEDGE_SERVICE_PROBLEM") % tpldict
             commands.append('echo "%s" > %s' % (ack_command, get_config("ICINGA_SOCKET")))
             if self.imms and node.immmonitoring:
                 ack_command = get_config("ICINGA_ACKNOWLEDGE_SERVICE_PROBLEM") % {
