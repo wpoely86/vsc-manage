@@ -135,10 +135,10 @@ class Icinga(Monitoring):
                 'timestamp': starttime - 1,
                 'comment': comment,
                 'clustername': node.clustername
-            },
+            }
             tpldict['host_name'] = get_config('ICINGA_HOSTNAME') % tpldict
-            ack_command = 'echo "%s" > %s' % (get_config("ICINGA_ACKNOWLEDGE_HOST_PROBLEM") % tpldict)
-            commands.append(ack_command, get_config("ICINGA_SOCKET"))
+            ack_command = 'echo "%s" > %s' % (get_config("ICINGA_ACKNOWLEDGE_HOST_PROBLEM") % tpldict, get_config("ICINGA_SOCKET"))
+            commands.append(ack_command)
             if self.imms and node.immmonitoring:
                 commands.append('echo "%s" > %s' % (get_config("ICINGA_ACKNOWLEDGE_HOST_PROBLEM") % {
                     'host_name': node.immmonitoring,
