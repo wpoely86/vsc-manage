@@ -52,7 +52,7 @@ shared_setup.SHARED_TARGET.update({
 
 PACKAGE = {
     'name': 'vsc-manage',
-    'version': '1.6.2',
+    'version': '1.6.3',
     'author': [jt],
     'maintainer': [jt],
     'packages': ['vsc', 'vsc.manage'],
