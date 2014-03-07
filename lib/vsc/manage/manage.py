@@ -307,7 +307,7 @@ class Manager(object):
 
             # keep track of errors
             try:
-                errors[node] = [x[1] for x in status[1]]
+                errors[node] = [x[1] for x in status[1] if x[1]]
             except (IndexError, TypeError):
                 # no errors is a normal case
                 pass
@@ -318,7 +318,7 @@ class Manager(object):
         # print errors
         if errors:
             txt += "Errors occured:\n    "
-            txt += "\n    ".join(["%s: %s" % (x, errors[x]) for x in sorted(errors.keys())])
+            txt += "\n    ".join(["%s: %s" % (x, errors[x]) for x in sorted(errors.keys()) if errors[x]])
             txt += "\n"
         self.log.info("getStatus in master: %s" % txt)
         print txt

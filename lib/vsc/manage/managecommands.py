@@ -33,7 +33,6 @@ from subprocess import Popen, PIPE
 from vsc import fancylogger
 import datetime
 import os
-import paramiko
 import re
 import signal
 import socket
@@ -41,6 +40,12 @@ import struct
 import telnetlib
 import time
 import traceback
+import warnings
+
+# ignore warnings when importing paramiko and it's dependencies
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    import paramiko
 
 
 class Worker(object):
@@ -817,7 +822,7 @@ class IpmiCommand(Command):
     """
     def __init__(self, hostname, command):
         #TODO: don't hard code this here
-        if "gulpin" in hostname or 'dugtrio' in hostname:
+        if "gulpin" in hostname or 'dugtrio' in hostname or 'delcatty' in hostname:
             user = get_config("GULPIN_IMMUSER")
         else:
             user = get_config("IMMUSER")
