@@ -260,7 +260,8 @@ class SshCommand(NetWorkCommand):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             if  self.passwd:
-                ssh.connect(self.host, username=self.user, password=self.passwd)
+                # no need to use the agent or keys, we have the password
+                ssh.connect(self.host, username=self.user, password=self.passwd, allow_agent=False, look_for_keys=False)
             else:
                 ssh.connect(self.host, username=self.user)
         except Exception, ex:
