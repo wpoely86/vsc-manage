@@ -37,6 +37,7 @@ DEFAULT_CONFIGFILE = '/etc/manage_defaults.cfg'
 # this one is if you want to overwrite some fo the the defaults with your own, without having to edit the original
 CONFIGFILES = ["/etc/manage.cfg", os.path.expanduser("~/.local/manage.cfg")]
 
+global CONFIG
 CONFIG = {}
 OPTIONS = None
 LOGGER = None
@@ -74,7 +75,7 @@ def parseoptions():
     try:
         for opt, val in parser.configfile_parser.items('raw_configs', raw=True):
             parser.log.debug("adding %s to config (from configfile) ", opt)
-            CONFIG[opt] = val
+            CONFIG[opt.lower()] = val
     except NoSectionError:
         parser.log.error("Could not find the [raw_configs] section in the configfile, make sure at least %s is present",
                          DEFAULT_CONFIGFILE)

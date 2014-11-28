@@ -30,11 +30,14 @@ Created on Oct 17, 2011
 '''
 try:
     import json
-except:
+except ImportError:
     import simplejson as json
 
 import gzip
-import libxml2
+try:
+    import libxml2
+except ImportError:
+    pass  # we will fail later
 import os
 import re
 import threading
