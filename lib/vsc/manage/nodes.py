@@ -946,7 +946,7 @@ class MasterNode(SpecialNode):
         self.pbsmomrestartCommand = TestCommand("No pbsmom on the masters!")
         self.pbsmomcleanupCommand = TestCommand("No pbsmom on the masters!")
         self.fixdownonerrorCommand = TestCommand("fixdownonerror is not run on a master")
-        # cheduling commands
+        # scheduling commands
         self.pauseSchedulerCommand = MoabPauseCommand(self.hostname)
         self.resumeSchedulerCommand = MoabResumeCommand(self.hostname)
         self.restartSchedulerCommand = MoabRestartCommand(self.hostname)
