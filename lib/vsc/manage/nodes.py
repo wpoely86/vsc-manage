@@ -30,11 +30,14 @@ Created on Oct 17, 2011
 '''
 try:
     import json
-except:
+except ImportError:
     import simplejson as json
 
 import gzip
-import libxml2
+try:
+    import libxml2
+except ImportError:
+    pass  # we will fail later
 import os
 import re
 import threading
@@ -126,22 +129,22 @@ class Node(Worker):
 
         # not implemented - use this command
 
-        ## Overwrite in extensions
-        #self.poweronCommand = None
-        #self.poweroffCommand = None
-        #self.ledoffcommand = NotSupportedCommand("ledoff")
-        #self.ledoncommand = NotSupportedCommand("ledon")
+        # Overwrite these in extensions #
+        # self.poweronCommand = None
+        # self.poweroffCommand = None
+        # self.ledoffcommand = NotSupportedCommand("ledoff")
+        # self.ledoncommand = NotSupportedCommand("ledon")
 
         self.statusCommand = None
 
         self.rebootCommand = None
 
         # this is only for workernodes
-        #self.pbsmomstatusCommand = NotSupportedCommand("pbsmomstatus")
-        #self.pbsmomcleanupCommand = NotSupportedCommand("pbsmomcleanup")
-        #self.pbsmomstopCommand = NotSupportedCommand("pbsmomstop")
-        #self.pbsmomrestartCommand = NotSupportedCommand("pbsmomrestart")
-        #self.fixdownonerrorCommand = NotSupportedCommand("fixdownonerror")
+        # self.pbsmomstatusCommand = NotSupportedCommand("pbsmomstatus")
+        # self.pbsmomcleanupCommand = NotSupportedCommand("pbsmomcleanup")
+        # self.pbsmomstopCommand = NotSupportedCommand("pbsmomstop")
+        # self.pbsmomrestartCommand = NotSupportedCommand("pbsmomrestart")
+        # self.fixdownonerrorCommand = NotSupportedCommand("fixdownonerror")
 
     def getStatus(self, forced=False):
         """
@@ -285,9 +288,9 @@ class Node(Worker):
         self._adcommand(command)
 
     #TODO: (medium)  implement shutdown:
-    #try softpoweroff first
+    # try softpoweroff first
     # if this fails, then powercut
-    #we need some state for this, like a daemon running on the master, or fork to background?
+    # we need some state for this, like a daemon running on the master, or fork to background?
 
     def _createCustomCommand(self, command):
         """
@@ -320,7 +323,7 @@ class Node(Worker):
         get quattor files and parse the xml, and return the content
         of a given xpath
         """
-        #parse xml
+        # parse xml
         doc = libxml2.parseFile(path)
         ctxt = doc.xpathNewContext()
         res = ctxt.xpathEval(xpath)
@@ -365,7 +368,7 @@ class Node(Worker):
             self.log.debug("No chassis and slot location found for node %s in %s" % (self, get_config("QUATTOR_PATH")))
             return location, "None"
 
-        #parse  content
+        # parse  content
 
         values1 = content1.groupdict()
         chassis = int(values1['chassis'])
@@ -434,7 +437,7 @@ class CompositeNode(Node):
         unless threaded = False is given
         or alternatively if group_by_chassis is True only one thread is started per chassis.
         """
-        #threading here!
+        # threading here!
         out = []
         if threaded:
             if group_by_chassis:
@@ -449,17 +452,17 @@ class CompositeNode(Node):
 
         return out
 
-        #avg of 3 runs
-        #threaded
-        #[root@gastly manage]# time python manage.py -a --pbsmomstatus
-        #real    0m12.032s
-        #user    0m9.928s
-        #sys    0m0.399s
-        #non threaded
-        #[root@gastly manage]# time python manage.py -a --pbsmomstatus --non_threaded
-        #real    0m25.367s
-        #user    0m9.551s
-        #sys    0m0.160s
+        # avg of 3 runs
+        # threaded
+        # [root@gastly manage]# time python manage.py -a --pbsmomstatus
+        # real    0m12.032s
+        # user    0m9.928s
+        # sys    0m0.399s
+        # non threaded
+        # [root@gastly manage]# time python manage.py -a --pbsmomstatus --non_threaded
+        # real    0m25.367s
+        # user    0m9.551s
+        # sys    0m0.160s
 
     def _getLocation(self):
         """
@@ -514,8 +517,8 @@ class CompositeNode(Node):
         """
         if not compositenode.__class__.__name__ == self.__class__.__name__:
             raise TypeError("CompositeNode expected")
-        #add all nodes from the new compositenode to our nodes
-        #don't do duplicates
+        # add all nodes from the new compositenode to our nodes
+        # don't do duplicates
         newnodes = compositenode.getNodes()
 
         for node in newnodes:
@@ -565,13 +568,13 @@ class CompositeNode(Node):
                                     " this is not allowed!")
         self.threads = []
         outputs = []
-        #creating threads and getting results as discussed here: http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
+        # creating threads and getting results as discussed here: http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
         if group_by_chassis:
             group = self.getNodesPerChassis()
         else:
             group = self
         for node in group.getNodes():
-            #commands are ran in parrallel, but serial on each node
+            # commands are ran in parrallel, but serial on each node
             #TODO (high): group by chassis to avoid overloading!
             out = []
             self.log.debug("running %s on %s with args: %s" % (method, node, args))
@@ -831,7 +834,7 @@ class CompositeNode(Node):
         return self.getNodes()[0].getMaster()
 
 
-## helper methods for multithreading
+# helper methods for multithreading
 def _threadingHandler(node, result, method, args):
     """
     calls a method on all nodes, in a threaded way
@@ -853,12 +856,10 @@ def _threadingHandler(node, result, method, args):
         else:
             status = nodemethod()
 
-        fancylogger.getLogger("_threadingNodeHandler").debug("%s from %s: %s" %
-                                                             (method, node, status))
+        fancylogger.getLogger("_threadingNodeHandler").debug("%s from %s: %s", method, node, status)
     except Exception, e:
         error = e
-    fancylogger.getLogger("_threadingNodeHandler").debug("%s from %s: %s" %
-                                                         (method, node, status))
+    fancylogger.getLogger("_threadingNodeHandler").debug("%s from %s: %s", method, node, status)
     result.append(node)
     result.append(status)
     result.append(error)
@@ -886,7 +887,7 @@ class WorkerNode(Node):
     """
     def __init__(self, nodeid, clustername, masternode):
         Node.__init__(self, nodeid, clustername, masternode)
-        #this is a class, the others should be real commands
+        # this is a class, the others should be real commands
         self.statusCommand = FullStatusCommand(self.hostname, masternode=self.getMaster())
 
         self.pbsmomstatusCommand = PbsmomCommand(self.hostname, "status")
@@ -907,9 +908,9 @@ class SpecialNode(Node):
         Node.__init__(self, nodeid, clustername, masternode)
         self.log.debug("Creating a special node: %s.%s" % (nodeid, clustername))
 
-### actual implementations
+# actual implementations
 
-        #these first 2 not for defaultnodes
+# these first 2 not for defaultnodes
 #        #self.customCommandClass =
 #        #self.statusCommand =
 #        self.poweronCommand =
@@ -939,23 +940,23 @@ class MasterNode(SpecialNode):
         self.setOnlineCommand = SetOnlineMasterCommand(self.hostname)
         self.setOfflineCommand = SetOfflineMasterCommand(self.hostname)
 
-        #no such commands
+        # no such commands
         self.pbsmomstatusCommand = TestCommand("No pbsmom on the masters!")
         self.pbsmomstopCommand = TestCommand("No pbsmom on the masters!")
         self.pbsmomrestartCommand = TestCommand("No pbsmom on the masters!")
         self.pbsmomcleanupCommand = TestCommand("No pbsmom on the masters!")
         self.fixdownonerrorCommand = TestCommand("fixdownonerror is not run on a master")
-        #cheduling commands
+        # scheduling commands
         self.pauseSchedulerCommand = MoabPauseCommand(self.hostname)
         self.resumeSchedulerCommand = MoabResumeCommand(self.hostname)
         self.restartSchedulerCommand = MoabRestartCommand(self.hostname)
 
-        #No set on or offline commands in masternodes
-        #set this depending on what type of node this is
+        # No set on or offline commands in masternodes
+        # set this depending on what type of node this is
 
-#        self.poweronCommand =
-#        self.poweroffCommand =
-#        self.rebootCommand =
+        # self.poweronCommand =
+        # self.poweroffCommand =
+        # self.rebootCommand =
 
     def setonline(self, nodelist):
         """
@@ -1058,14 +1059,16 @@ class BladeNode(Node):
         }
 
         self.softpoweroffCommand = BladeSoftPoweroffCommand(chassisname=self.shassishost,
-                                                            slot=self.slot)
+                                                            slot=self.slot,
+                                                            )
         self.poweroffCommand = BladePoweroffCommand(chassisname=self.shassishost, slot=self.slot)
         self.poweronCommand = BladePoweronCommand(chassisname=self.shassishost, slot=self.slot)
         self.rebootCommand = BladeRebootCommand(chassisname=self.shassishost, slot=self.slot)
         self.statusCommand = FullBladeStatusCommand(host=self.hostname,
                                                     masternode=self.getMaster(),
                                                     chassisname=self.shassishost,
-                                                    slot=self.slot)
+                                                    slot=self.slot,
+                                                    )
         self.ledoffcommand = NotSupportedCommand("ledoff")
         self.ledoncommand = NotSupportedCommand("ledon")
 
@@ -1105,16 +1108,14 @@ class ImmNode(Node):
             'clustername': self.clustername,
         }
         self.statusCommand = FullImmStatusCommand(host, adminhost, self.getMaster())
-        self.softpoweroffCommand = SoftPoweroffCommand(adminhost)
         self.poweronCommand = ImmPoweronCommand(adminhost)
         self.poweroffCommand = ImmPoweroffCommand(adminhost)
         self.rebootCommand = ImmRebootCommand(adminhost)
-        self.softrebootCommand = SoftRebootCommand(adminhost)
         self.ledoffcommand = NotSupportedCommand("ledoff")
         self.ledoncommand = NotSupportedCommand("ledon")
 
 
-## Actual node implementations
+# Actual node implementations
 
 class ImmWorkerNode(ImmNode, WorkerNode):
     """
@@ -1150,9 +1151,9 @@ class CuboneWorkerNode(BladeNode, WorkerNode):
     def __init__(self, nodeid, clustername, masternode):
         WorkerNode.__init__(self, nodeid, clustername, masternode)
         BladeNode.__init__(self, nodeid, clustername, masternode)
-#        self.poweronCommand = TestCommand("poweron on %s.%s" % (nodeid, clustername))
-#        self.poweroffCommand = TestCommand("poweroff on %s.%s" % (nodeid, clustername))
-#        self.rebootCommand = TestCommand("reboot on %s.%s" % (nodeid, clustername))
+        # self.poweronCommand = TestCommand("poweron on %s.%s" % (nodeid, clustername))
+        # self.poweroffCommand = TestCommand("poweroff on %s.%s" % (nodeid, clustername))
+        # self.rebootCommand = TestCommand("reboot on %s.%s" % (nodeid, clustername))
 
 
 class CuboneMasterNode(BladeNode, MasterNode):
@@ -1177,7 +1178,6 @@ class DracNode(Node):
         self.poweronCommand = DracPoweronCommand(adminhost)
         self.poweroffCommand = DracPoweroffCommand(adminhost)
         self.rebootCommand = DracRebootCommand(adminhost)
-        #self.softrebootCommand = DracSoftRebootCommand(adminhost)
         self.ledoffcommand = NotSupportedCommand("ledoff")
         self.ledoncommand = NotSupportedCommand("ledon")
 
@@ -1299,7 +1299,7 @@ class TestNode(Node):
         self.ledoncommand = TestCommand("ledon on %s.%s" % (nodeid, clustername))
 
 
-### Exceptions
+# Exceptions
 
 class NodeException(Exception):
     """

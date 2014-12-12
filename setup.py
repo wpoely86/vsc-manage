@@ -32,7 +32,7 @@ vsc-manage distribution setup.py
 """
 try:
     import vsc.install.shared_setup as shared_setup
-    from vsc.install.shared_setup import ag, kh, sdw, wdp, jt
+    from vsc.install.shared_setup import jt
 except ImportError:
     print "vsc.install could not be found, make sure a recent vsc-base is installed"
     print "you might want to try 'easy_install [--user] https://github.com/hpcugent/vsc-base/archive/master.tar.gz'"
@@ -52,13 +52,13 @@ shared_setup.SHARED_TARGET.update({
 
 PACKAGE = {
     'name': 'vsc-manage',
-    'version': '1.6.4',
+    'version': '1.6.5',
     'author': [jt],
     'maintainer': [jt],
     'packages': ['vsc', 'vsc.manage'],
     'namespace_packages': ['vsc'],
     'scripts': ['bin/misty.py'],
-    'data_files': [('/etc',['config/manage_defaults.cfg'])],
+    'data_files': [('/etc', ['config/manage_defaults.cfg'])],
     'install_requires': [
         'libxml2-python',
         'paramiko',
