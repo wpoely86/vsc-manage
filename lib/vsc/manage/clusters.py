@@ -38,7 +38,7 @@ import platform
 import os
 import re
 from vsc.manage.nodes import CompositeNode, MasterNode, StorageNode, DracMasterNode, \
-    DracWorkerNode, CuboneWorkerNode, BladeWorkerNode, ImmMasterNode, ImmWorkerNode, \
+    CuboneWorkerNode, BladeWorkerNode, ImmMasterNode, ImmWorkerNode, \
     IpmiWorkerNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode
 from vsc.manage.managecommands import PBSStateCommand
 from vsc.manage.config import get_config
@@ -306,7 +306,7 @@ class Cluster(object):
 
 # ## extensions of cluster
 # add new cluster here
-#TODO: get cluster configuration from config file, not here
+# TODO: get cluster configuration from config file, not here
 
 # TODO: (medium) #469 allow for getting nodes and their commands from quattor
 # create the cluster commands from quattor xml files
@@ -420,6 +420,20 @@ class raichu(Cluster):
         """
         Cluster.__init__(self)
         self.workerNodeClass = DMTFSMASHCLPIpmiWorkerNode  # hp gen8
+        self.masterNodeClass = DMTFSMASHCLPIpmiMasterNode
+
+
+class phanpy(Cluster):
+    """
+    this class represents the phanpy cluster (hp gen9)
+    """
+    def __init__(self):
+        """
+        constructor
+        sets the nodeclass
+        """
+        Cluster.__init__(self)
+        self.workerNodeClass = DMTFSMASHCLPIpmiWorkerNode  # hp gen9
         self.masterNodeClass = DMTFSMASHCLPIpmiMasterNode
 
 
