@@ -829,7 +829,7 @@ class IpmiCommand(Command):
         else:
             user = get_config("IMMUSER")
 
-        command = "ipmitool -I %s -H %s -U %s -P '%s' chassis power %s" % \
+        command = "sudo ipmitool -I %s -H %s -U %s -P '%s' chassis power %s" % \
             (self._PROTOCOL, hostname, user, get_config("CBMCPASSWD"), command)
         Command.__init__(self, command)
 
