@@ -584,13 +584,8 @@ class PBSStateCommand(SshCommand):
         out, err = SshCommand.run(self)
         try:
             #no templates here, commands are basically the templates themselves.
-            out = re.findall("node.*?.vsc|state .*?\n", out)
-            #out contains ['node.cluster.gent.vsc','state = state\n']
-            nodenames = out[::2]
-            nodestates = out[1::2]
-            nodestates = [state.strip("\n").replace("state = ", "") for state in nodestates]
-            nodenames = [name.split('.')[0] for name in nodenames]
-            out = dict(zip(nodenames, nodestates))
+            out = re.findall("(node\d+).*?.vsc\n.*state = (.*?)\n", out)
+            out = dict(out)
         except Exception, ex:
             self.log.warning("could not parse pbsnodes output : %s" % ex)
             self.log.debug(traceback.format_exc())
