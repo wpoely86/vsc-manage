@@ -39,7 +39,8 @@ import os
 import re
 from vsc.manage.nodes import CompositeNode, MasterNode, StorageNode, DracMasterNode, \
     CuboneWorkerNode, BladeWorkerNode, ImmMasterNode, ImmWorkerNode, \
-    IpmiWorkerNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode
+    IpmiWorkerNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode, \
+    OpenIpmiWorkerNode, OpenIpmiMasterNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode
 from vsc.manage.managecommands import PBSStateCommand
 from vsc.manage.config import get_config
 from vsc.utils import fancylogger
@@ -433,8 +434,8 @@ class phanpy(Cluster):
         sets the nodeclass
         """
         Cluster.__init__(self)
-        self.workerNodeClass = DMTFSMASHCLPIpmiWorkerNode  # hp gen9
-        self.masterNodeClass = DMTFSMASHCLPIpmiMasterNode
+        self.workerNodeClass = OpenIpmiWorkerNode  # hp gen9
+        self.masterNodeClass = OpenIpmiMasterNode
 
 
 class delcatty(Cluster):

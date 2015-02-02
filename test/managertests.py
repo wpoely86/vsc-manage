@@ -107,7 +107,7 @@ class ManageTest(TestCase):
         for name in clusternames:
             #TODO: add support for non clustered devices: https://github.com/hpcugent/vsc-manage/issues/1
             # ignore unsupported 'clusters'
-            if name not in ('ugent', 'gligar', 'muk'):
+            if name not in ('ugent', 'gligar', 'muk', 'altaria'):
                 self.clustertest(name)
 
     def testManagerCreatorNodesFromChassis(self):

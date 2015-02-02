@@ -57,8 +57,9 @@ from managecommands import BladeSoftPoweroffCommand, BladePoweronCommand, \
     ImmPoweronCommand, ImmPoweroffCommand, ImmRebootCommand, \
     FullImmStatusCommand, MoabPauseCommand, MoabResumeCommand, MoabRestartCommand, \
     Worker, NotSupportedCommand, DMTFSMASHCLPLEDOnCommand, \
-    DMTFSMASHCLPLEDOffCommand, FixDownOnErrorCommand
-
+    DMTFSMASHCLPLEDOffCommand, FixDownOnErrorCommand, \
+    OpenIpmiFullStatusCommand, OpenIpmiPoweronCommand, \
+    OpenIpmiPoweroffCommand, OpenIpmiSoftPoweroffCommand, OpenIpmiRebootCommand
 
 class Node(Worker):
     """
@@ -1220,6 +1221,23 @@ class IpmiNode(Node):
         self.ledoncommand = NotSupportedCommand("ledon")
 
 
+class OpenIpmiNode(Node):
+    """
+    Implementation of a node using the OpenIpmi commands
+    """
+    def __init__(self, nodeid, clustername, masternode):
+        Node.__init__(self, nodeid, clustername, masternode)
+        adminhost = self.immname
+        hostname = self.hostname
+        self.statusCommand = OpenIpmiFullStatusCommand(hostname, adminhost, self.getMaster())
+        self.poweronCommand = OpenIpmiPoweronCommand(adminhost)
+        self.poweroffCommand = OpenIpmiPoweroffCommand(adminhost)
+        self.softpoweroffCommand = OpenIpmiSoftPoweroffCommand(adminhost)
+        self.rebootCommand = OpenIpmiRebootCommand(adminhost)
+        self.ledoffcommand = NotSupportedCommand("ledoff")
+        self.ledoncommand = NotSupportedCommand("ledon")
+
+
 class IpmiMasterNode(IpmiNode, MasterNode):
     """
     Implementation of a node using the ipmi commands
@@ -1229,6 +1247,15 @@ class IpmiMasterNode(IpmiNode, MasterNode):
         IpmiNode.__init__(self, nodeid, clustername, self)
 
 
+class OpenIpmiMasterNode(OpenIpmiNode, MasterNode):
+    """
+    Implementation of a node using the ipmi commands
+    """
+    def __init__(self, nodeid, clustername, masternode):
+        MasterNode.__init__(self, nodeid, clustername)
+        OpenIpmiNode.__init__(self, nodeid, clustername, self)
+
+
 class IpmiWorkerNode(IpmiNode, WorkerNode):
     """
     Implementation of a node using the ipmi commands
@@ -1236,6 +1263,15 @@ class IpmiWorkerNode(IpmiNode, WorkerNode):
     def __init__(self, nodeid, clustername, masternode):
         WorkerNode.__init__(self, nodeid, clustername, masternode)
         IpmiNode.__init__(self, nodeid, clustername, masternode)
+
+
+class OpenIpmiWorkerNode(OpenIpmiNode, WorkerNode):
+    """
+    Implementation of a node using the ipmi commands
+    """
+    def __init__(self, nodeid, clustername, masternode):
+        WorkerNode.__init__(self, nodeid, clustername, masternode)
+        OpenIpmiNode.__init__(self, nodeid, clustername, masternode)
 
 
 class DMTFSMASHCLPNode(Node):
