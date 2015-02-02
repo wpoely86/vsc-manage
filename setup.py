@@ -52,7 +52,7 @@ shared_setup.SHARED_TARGET.update({
 
 PACKAGE = {
     'name': 'vsc-manage',
-    'version': '1.6.5',
+    'version': '1.6.6',
     'author': [jt],
     'maintainer': [jt],
     'packages': ['vsc', 'vsc.manage'],
@@ -60,7 +60,7 @@ PACKAGE = {
     'scripts': ['bin/misty.py'],
     'data_files': [('/etc', ['config/manage_defaults.cfg'])],
     'install_requires': [
-        'libxml2-python',
+#        'python-libxml2',
         'paramiko',
         'pycrypto >= 1.9',
     ],
