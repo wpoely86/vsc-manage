@@ -1242,7 +1242,7 @@ class IpmiMasterNode(IpmiNode, MasterNode):
     """
     Implementation of a node using the ipmi commands
     """
-    def __init__(self, nodeid, clustername, masternode):
+    def __init__(self, nodeid, clustername):
         MasterNode.__init__(self, nodeid, clustername)
         IpmiNode.__init__(self, nodeid, clustername, self)
 
@@ -1251,7 +1251,7 @@ class OpenIpmiMasterNode(OpenIpmiNode, MasterNode):
     """
     Implementation of a node using the ipmi commands
     """
-    def __init__(self, nodeid, clustername, masternode):
+    def __init__(self, nodeid, clustername):
         MasterNode.__init__(self, nodeid, clustername)
         OpenIpmiNode.__init__(self, nodeid, clustername, self)
 
