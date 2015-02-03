@@ -437,6 +437,9 @@ class phanpy(Cluster):
         self.workerNodeClass = OpenIpmiWorkerNode  # hp gen9
         self.masterNodeClass = OpenIpmiMasterNode
 
+class golett(phanpy):
+    """This class represents the gollet, it's equal to phanpy"""
+    pass
 
 class delcatty(Cluster):
     """
