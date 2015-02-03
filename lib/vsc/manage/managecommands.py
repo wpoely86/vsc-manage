@@ -584,13 +584,8 @@ class PBSStateCommand(SshCommand):
         out, err = SshCommand.run(self)
         try:
             #no templates here, commands are basically the templates themselves.
-            out = re.findall("node.*?.vsc|state .*?\n", out)
-            #out contains ['node.cluster.gent.vsc','state = state\n']
-            nodenames = out[::2]
-            nodestates = out[1::2]
-            nodestates = [state.strip("\n").replace("state = ", "") for state in nodestates]
-            nodenames = [name.split('.')[0] for name in nodenames]
-            out = dict(zip(nodenames, nodestates))
+            out = re.findall("(node\d+).*?.vsc\n.*state = (.*?)\n", out)
+            out = dict(out)
         except Exception, ex:
             self.log.warning("could not parse pbsnodes output : %s" % ex)
             self.log.debug(traceback.format_exc())
@@ -821,6 +816,7 @@ class IpmiCommand(Command):
     """
     commands for ipmi enabled bmc/dracs
     """
+    _PROTOCOL = 'lanplus'
     def __init__(self, hostname, command):
         #TODO: don't hard code this here
         if "gulpin" in hostname or 'dugtrio' in hostname or 'delcatty' in hostname:
@@ -828,20 +824,25 @@ class IpmiCommand(Command):
         else:
             user = get_config("IMMUSER")
 
-        command = "ipmitool -I lanplus -H %s -U %s -P '%s' chassis power %s" % \
-            (hostname, user, get_config("CBMCPASSWD"), command)
+        command = "sudo ipmitool -I %s -H %s -U %s -P '%s' chassis power %s" % \
+            (self._PROTOCOL, hostname, user, get_config("CBMCPASSWD"), command)
         Command.__init__(self, command)
+
 
 
 class IpmiPoweroffCommand(IpmiCommand):
     def __init__(self, hostname):
         IpmiCommand.__init__(self, hostname, "off")
 
+class OpenIpmiPoweroffCommand(IpmiPoweroffCommand):
+    _PROTOCOL = 'open'
 
 class IpmiSoftPoweroffCommand(IpmiCommand):
     def __init__(self, hostname):
         IpmiCommand.__init__(self, hostname, "soft")
 
+class OpenIpmiSoftPoweroffCommand(IpmiSoftPoweroffCommand):
+    _PROTOCOL = 'open'
 
 class IpmiPoweronCommand(IpmiCommand):
     def __init__(self, hostname):
@@ -852,15 +853,22 @@ class IpmiPoweronCommand(IpmiCommand):
 #        IpmiCommand.__init__(self, hostname, "cycle")
 
 
+class OpenIpmiPoweronCommand(IpmiPoweronCommand):
+    _PROTOCOL = 'open'
+
 class IpmiRebootCommand(IpmiCommand):
     def __init__(self, hostname):
         IpmiCommand.__init__(self, hostname, "reset")
 
+class OpenIpmiRebootCommand(IpmiRebootCommand):
+    _PROTOCOL = 'open'
 
 class IpmiStatusCommand(IpmiCommand):
     def __init__(self, hostname):
         IpmiCommand.__init__(self, hostname, "status")
 
+class OpenIpmiStatusCommand(IpmiStatusCommand):
+    _PROTOCOL = 'open'
 
 class IpmiFullStatusCommand(FullStatusCommand):
     """
@@ -873,6 +881,19 @@ class IpmiFullStatusCommand(FullStatusCommand):
         FullStatusCommand.__init__(self, host, masternode)
         #this is run on the nat
         self.addCommand(IpmiStatusCommand(adminhost))
+
+
+class OpenIpmiFullStatusCommand(FullStatusCommand):
+    """
+    returns  the full status of a blade node
+    """
+    def __init__(self, host, adminhost, masternode):
+        """
+        constructor
+        """
+        FullStatusCommand.__init__(self, host, masternode)
+        #this is run on the nat
+        self.addCommand(OpenIpmiStatusCommand(adminhost))
 
 
 class DMTFSMASHCLPLEDOnCommand(SshCommand):
