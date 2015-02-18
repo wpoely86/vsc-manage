@@ -1,5 +1,5 @@
 ##
-# Copyright 2011-2013 Ghent University
+# Copyright 2011-2015 Ghent University
 #
 # This file is part of vsc-manage,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -46,6 +46,8 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import paramiko
+
+OPEN = 'lanplus'
 
 
 class Worker(object):
@@ -835,14 +837,14 @@ class IpmiPoweroffCommand(IpmiCommand):
         IpmiCommand.__init__(self, hostname, "off")
 
 class OpenIpmiPoweroffCommand(IpmiPoweroffCommand):
-    _PROTOCOL = 'open'
+    _PROTOCOL = OPEN
 
 class IpmiSoftPoweroffCommand(IpmiCommand):
     def __init__(self, hostname):
         IpmiCommand.__init__(self, hostname, "soft")
 
 class OpenIpmiSoftPoweroffCommand(IpmiSoftPoweroffCommand):
-    _PROTOCOL = 'open'
+    _PROTOCOL = OPEN
 
 class IpmiPoweronCommand(IpmiCommand):
     def __init__(self, hostname):
@@ -854,21 +856,21 @@ class IpmiPoweronCommand(IpmiCommand):
 
 
 class OpenIpmiPoweronCommand(IpmiPoweronCommand):
-    _PROTOCOL = 'open'
+    _PROTOCOL = OPEN
 
 class IpmiRebootCommand(IpmiCommand):
     def __init__(self, hostname):
         IpmiCommand.__init__(self, hostname, "reset")
 
 class OpenIpmiRebootCommand(IpmiRebootCommand):
-    _PROTOCOL = 'open'
+    _PROTOCOL =  OPEN
 
 class IpmiStatusCommand(IpmiCommand):
     def __init__(self, hostname):
         IpmiCommand.__init__(self, hostname, "status")
 
 class OpenIpmiStatusCommand(IpmiStatusCommand):
-    _PROTOCOL = 'open'
+    _PROTOCOL = OPEN
 
 class IpmiFullStatusCommand(FullStatusCommand):
     """
