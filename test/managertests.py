@@ -1,5 +1,5 @@
 ##
-# Copyright 2011-2013 Ghent University
+# Copyright 2011-2015 Ghent University
 #
 # This file is part of vsc-manage,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -37,6 +37,8 @@ from vsc.manage.clusters import Cluster, NoSuchClusterException
 from vsc.manage.nodes import NodeException
 
 QUATTOR_PATH = get_config("QUATTOR_PATH")
+TEST_CLUSTER = 'shuppet'
+TEST_NODE = 'node2201'
 
 
 class ManageTest(TestCase):
@@ -47,14 +49,14 @@ class ManageTest(TestCase):
     def tearDown(self):
         pass
 
-    #TODO: add tests for  options.pause  options.resume and options.restart
+    # TODO: add tests for  options.pause  options.resume and options.restart
 
     def testChedulerOptions(self):
         """
         test the cheduler options
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.pause = True
         Manager(opts)
         opts.resume = True
@@ -102,12 +104,12 @@ class ManageTest(TestCase):
         if not os.path.exists(QUATTOR_PATH):
             print "current wd: %s" % os.getcwd()
             self.fail("Path not found, check quattor path:%s" % QUATTOR_PATH)
-
-        clusternames = set([s.split('.')[1] for s in os.listdir(QUATTOR_PATH)])  # get names from the files in the quattor dir
+        # get names from the files in the quattor dir
+        clusternames = set([s.split('.')[1] for s in os.listdir(QUATTOR_PATH)])
         for name in clusternames:
-            #TODO: add support for non clustered devices: https://github.com/hpcugent/vsc-manage/issues/1
+            # TODO: add support for non clustered devices: https://github.com/hpcugent/vsc-manage/issues/1
             # ignore unsupported 'clusters'
-            if name not in ('ugent', 'gligar', 'muk', 'altaria'):
+            if name not in ('ugent', 'gligar', 'muk', 'altaria', 'zorua', 'gigalith', 'gengar', 'cubone'):
                 self.clustertest(name)
 
     def testManagerCreatorNodesFromChassis(self):
@@ -115,7 +117,7 @@ class ManageTest(TestCase):
         test the manager constructor with the chassis option
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.chassis = "61"
         Manager(opts)
 
@@ -130,7 +132,7 @@ class ManageTest(TestCase):
         test the manager constructor with a nodename option
         """
         opts = Options()
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.node = 'nosuchnodeid3234#%'
         opts.setonline = True
 
@@ -166,11 +168,11 @@ class ManageTest(TestCase):
             pass
         else:
             self.fail("manager didn't fail with a NodeException when an unknown node was selected")
-        opts.node = 'node613,610,magikarp'
+        opts.node = 'node2201,201,magikarp'
         Manager(opts)
-        opts.node = 'node613-node615'
+        opts.node = 'node2201-node2205'
         Manager(opts)
-        opts.node = 'node610,node613-node615,magikarp'
+        opts.node = 'node2208,node2203-node2205,magikarp'
         Manager(opts)
 
     def testManagerCreatorNodeOptions(self):
@@ -180,7 +182,7 @@ class ManageTest(TestCase):
 #        debug = True cluster = None chassis = None down = False all = False
 #        idle = False offline = False node = ""
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         Manager(opts)  # should create a manager
 
         opts.down = True
@@ -200,12 +202,11 @@ class ManageTest(TestCase):
         test on inclusion of special nodes
         """
         opts = Options()
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
 
         manager = Manager(opts)
         self.assertFalse(manager.hasSpecials())
         opts.worker = True
-        #self.assertRaises(Exception, Manager, opts)
         manager = Manager(opts)
         self.assertFalse(manager.hasSpecials())
         opts.all_nodes = True
@@ -213,18 +214,18 @@ class ManageTest(TestCase):
         self.assertTrue(manager.hasSpecials())  # should have special nodes with force (the master)
 
         opts = Options()
-        opts.cluster = 'cubone'
-        opts.master = "master7"
+        opts.cluster = TEST_CLUSTER
+        opts.master = "master1"
         self.assertTrue(Manager(opts).hasSpecials())  # should create a manager
 
-    #TODO: test for storage
+    # TODO: test for storage
 
 #    def testManagerSetOnlineOption(self):
 #        """
 #        test the setonline option parameter
 #        """
 #        opts = Options() #default options object
-#        opts.cluster = 'cubone'
+#        opts.cluster = TEST_CLUSTER
 #        opts.worker = True
 #        opts.setonline = True
 #        Manager(opts)
@@ -234,8 +235,8 @@ class ManageTest(TestCase):
         test the setonline option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
-        opts.node = 'node613'
+        opts.cluster = TEST_CLUSTER
+        opts.node = 'node2201'
         opts.setonline = True
         Manager(opts).doit()
 
@@ -244,22 +245,22 @@ class ManageTest(TestCase):
         test the Ledon, ledoff and ledstatus option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
-        opts.node = 'node610'
+        opts.cluster = TEST_CLUSTER
+        opts.node = 'node2201'
         opts.ledon = True
         Manager(opts).doit()
-        #TODO: get led status and test if it's on
+        # TODO: get led status and test if it's on
         opts.ledon = False
         opts.ledoff = True
         Manager(opts).doit()
-        #TODO: get led status and test if it's off
+        # TODO: get led status and test if it's off
 
     def testManagerTestrun(self):
         """
         test the setonline option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.worker = True
         opts.testrun = True
         Manager(opts).doit()
@@ -269,7 +270,7 @@ class ManageTest(TestCase):
 #        test the setoffline option parameter
 #        """
 #        opts = Options() #default options object
-#        opts.cluster = 'cubone'
+#        opts.cluster = TEST_CLUSTER
 #        opts.worker = True
 #        opts.setoffline = True
 #        Manager(opts)
@@ -279,8 +280,8 @@ class ManageTest(TestCase):
         test the setoffline option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
-        opts.node = 'node610'
+        opts.cluster = TEST_CLUSTER
+        opts.node = TEST_NODE
         opts.setoffline = True
         Manager(opts).doit()
 
@@ -289,8 +290,8 @@ class ManageTest(TestCase):
         test the setoffline option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
-        opts.node = 'node610-617'
+        opts.cluster = TEST_CLUSTER
+        opts.node = 'node2201-node2208'
         opts.setoffline = True
         opts.ack = True
         Manager(opts)
@@ -300,8 +301,8 @@ class ManageTest(TestCase):
         test the setoffline option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
-        opts.node = 'node610-617'
+        opts.cluster = TEST_CLUSTER
+        opts.node = 'node2201-node2208'
         opts.setoffline = True
         opts.downtime = "2 m"
         Manager(opts)  # should fail
@@ -313,8 +314,8 @@ class ManageTest(TestCase):
         test the setoffline option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
-        opts.node = 'node610-617'
+        opts.cluster = TEST_CLUSTER
+        opts.node = 'node2201-node2208'
         opts.ack_service = "Swapping"
         Manager(opts)
 
@@ -323,20 +324,20 @@ class ManageTest(TestCase):
         test the powercut option parameter
         """
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.worker = True
         opts.powercut = True
         Manager(opts)
 
     def testManagerQuattorOption(self):
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.quattor_nodes = True
         opts.runcmd = "echo hello"
 
     def testNoDefaultRuncmdOption(self):
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.quattor_nodes = True
         manager = Manager(opts)
         print "showcommands", manager.nodes.showCommands()
@@ -349,7 +350,7 @@ class ManageTest(TestCase):
 #        debug = True cluster = None chassis = None down = False all = False
 #        idle = False offline = False node = ""
         opts = Options()  # default options object
-        opts.cluster = 'cubone'
+        opts.cluster = TEST_CLUSTER
         opts.quattor = True
         opts.all = True
         opts.forced = True

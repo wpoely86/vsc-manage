@@ -47,8 +47,6 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import paramiko
 
-OPEN = 'lanplus'
-
 
 class Worker(object):
     """
@@ -126,8 +124,8 @@ class Command(object):
         """
         self.log.debug("Run going to run %s" % self.command)
         start = datetime.datetime.now()
-        #TODO: (high) buffer overflow here sometimes, check what happens and fix
-        #see easybuild/buildsoft/async
+        # TODO: (high) buffer overflow here sometimes, check what happens and fix
+        # see easybuild/buildsoft/async
         p = Popen(self.command, shell=True, stdout=PIPE, stderr=PIPE, close_fds=True)
         timedout = False
         while p.poll() is None:
@@ -137,7 +135,8 @@ class Command(object):
                 if (now - start).seconds > self.timeout:
                     if timedout is False:
                         os.kill(p.pid, signal.SIGTERM)
-                        self.log.debug("Timeout occured with cmd %s. took more than %i secs to complete." % (self.command, self.timeout))
+                        self.log.debug("Timeout occured with cmd %s. took more than %i secs to complete." %
+                                       (self.command, self.timeout))
                         timedout = True
                     else:
                         os.kill(p.pid, signal.SIGKILL)
@@ -153,7 +152,7 @@ class Command(object):
         return out, err
 
 
-#composite command
+# composite command
 class CompositeCommand(Command):
     """
     a command that can hold several commands and forwards run and getcommand to all of these
@@ -191,7 +190,8 @@ class NetWorkCommand(Command):
     this represents a command to be run over the network
     so they need a host, user, pw, port and timeout
     """
-    def __init__(self, command=None, host=None, user=None, passwd=None, port=None, timeout=get_config("COMMAND_TIMEOUT")):
+    def __init__(self, command=None, host=None, user=None, passwd=None, port=None,
+                 timeout=get_config("COMMAND_TIMEOUT")):
         """
         constructor
         """
@@ -206,7 +206,8 @@ class NetWorkCommand(Command):
         """
         shows what commands would be run
         """
-        return "%s: %s@%s:%s command: %s" % (self.__class__.__name__, self.user, self.host, str(self.port), self.command)
+        return "%s: %s@%s:%s command: %s" % (self.__class__.__name__, self.user, self.host, str(self.port),
+                                             self.command)
 
     def __str__(self):
         return self.getCommand()
@@ -241,12 +242,13 @@ class SshCommand(NetWorkCommand):
             exitcode = chan.recv_exit_status()
             return stdin, stdout, stderr, exitcode
 
-    def __init__(self, command=None, host=None, user="root", port=22, timeout=get_config("COMMAND_TIMEOUT"), passwd=None):
+    def __init__(self, command=None, host=None, user="root", port=22, timeout=get_config("COMMAND_TIMEOUT"),
+                 passwd=None):
         """
         constructor
         """
+        # self.command = 'ssh -p %s -l %s %s "%s"' % (self.port, self.user, self.host, command)
         NetWorkCommand.__init__(self, command, host, user, passwd, port, timeout)
-        #self.command = 'ssh -p %s -l %s %s "%s"' % (self.port, self.user, self.host, command)
 
     def run(self):
         """
@@ -256,12 +258,11 @@ class SshCommand(NetWorkCommand):
         """
         out = None
         err = None
-        #use our inner class
+        # use our inner class
         ssh = SshCommand.TimeoutSSHClient()
-        #ssh =paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            if  self.passwd:
+            if self.passwd:
                 # no need to use the agent or keys, we have the password
                 ssh.connect(self.host, username=self.user, password=self.passwd, allow_agent=False, look_for_keys=False)
             else:
@@ -277,11 +278,11 @@ class SshCommand(NetWorkCommand):
         try:
             stdin, stdout, stderr, exitcode = ssh.exec_command(self.command, timeout=self.timeout)
         except Exception, ex:
-            #catch the stacktrace
+            # catch the stacktrace
             self.log.info("Problem occured trying to run %s on %s: err (%s): %s" %
                           (self.command, self.host, ex.__class__.__name__, ex))
             self.log.debug(traceback.format_exc())
-        #catch the output
+        # catch the output
         try:
             out = stdout.read().strip()
         except:
@@ -289,18 +290,18 @@ class SshCommand(NetWorkCommand):
         try:
             err = stderr.read().strip()
         except Exception, ex:
-            #really try to print something if an exception occurred
+            # really try to print something if an exception occurred
             if not err:
                 err = "%s %s " % (ex.__class__.__name__, str(ex))
             self.log.info("Problem occurred trying to get output from %s: out: %s err: %s" % (self.host, out, ex))
             self.log.debug(traceback.format_exc())
 
         if not err and exitcode:
-            #no error, but something went wrong
+            # no error, but something went wrong
             err = "exitcode: %d" % exitcode
 
         try:
-            #close our files
+            # close our files
             stdin.close()
             stdout.close()
             stderr.close()
@@ -308,7 +309,7 @@ class SshCommand(NetWorkCommand):
             pass
         self.log.debug("%s on %s returned out: %s, err: %s" % (self.command, self.host, out, err))
         ssh.close()
-        return  out, err
+        return out, err
 
 
 class TelnetCommand(NetWorkCommand):
@@ -364,14 +365,15 @@ class TelnetCommand(NetWorkCommand):
         return out, err
 
 
-### non abstract commands ###
+""" non abstract commands """
 
-## state commands check if servers are alive (responding to ping) and responding (accepting ssh connections)
+
+# state commands check if servers are alive (responding to ping) and responding (accepting ssh connections)
 class ServerRespondingCommand(SshCommand):
     """
     check if a server is alive (accepting ssh connections and running commands)
     """
-    def  __init__(self, host=None, timeout=get_config("COMMAND_FAST_TIMEOUT")):
+    def __init__(self, host=None, timeout=get_config("COMMAND_FAST_TIMEOUT")):
         SshCommand.__init__(self, command='uname', host=host, user='root', timeout=timeout)
 
     def run(self):
@@ -474,7 +476,7 @@ class PBSNodeStateCommand(Command):
         self.host = None
 
     def run(self):
-        #TODO: out,err in this
+        # TODO: out,err in this
         return self.masternode.getPbsStatusForNode(self.node)
 
 
@@ -488,7 +490,7 @@ class FixDownOnErrorCommand(SshCommand):
                             host=hostname, user='root')
 
 
-## master commands
+# master commands
 
 class MasterStatusCommand(CompositeCommand):
     """
@@ -553,7 +555,7 @@ class SetOfflineMasterCommand(MasterCommand):
         MasterCommand.__init__(self, master, nodelist, "pbsnodes -o %s ")
 
 
-## custom commands
+# custom commands
 
 
 class FullStatusCommand(MasterStatusCommand):
@@ -585,7 +587,7 @@ class PBSStateCommand(SshCommand):
         """
         out, err = SshCommand.run(self)
         try:
-            #no templates here, commands are basically the templates themselves.
+            # no templates here, commands are basically the templates themselves.
             out = re.findall("(node\d+).*?.vsc\n.*state = (.*?)\n", out)
             out = dict(out)
         except Exception, ex:
@@ -618,43 +620,43 @@ class MoabRestartCommand(SshCommand):
     def __init__(self, host, timeout=get_config("COMMAND_TIMEOUT")):
         SshCommand.__init__(self, command='mschedctl -R', host=host, user='root', timeout=timeout)
 
-#IMM's
+# IMM's
 
 
 class ImmCommand(TelnetCommand):
-    def __init__(self, host, command):
-        TelnetCommand.__init__(self, command=command, host=host, user=get_config("IMMUSER"),
+    def __init__(self, host, cluster, command):
+        TelnetCommand.__init__(self, command=command, host=host, user=get_config("IMM_USER_%s" % cluster.upper()),
                                passwd=get_config("IMMPASSWD"))
 
 
 class ImmPoweroffCommand(ImmCommand):
-    def __init__(self, host):
-        ImmCommand.__init__(self, command='power off', host=host)
+    def __init__(self, host, cluster):
+        ImmCommand.__init__(self, cluster=cluster, command='power off', host=host)
 
 
 class ImmSoftPoweroffCommand(ImmCommand):
-    def __init__(self, host):
-        ImmCommand.__init__(self, command='power off -s', host=host)
+    def __init__(self, host, cluster):
+        ImmCommand.__init__(self, cluster=cluster, command='power off -s', host=host)
 
 
 class ImmPoweronCommand(ImmCommand):
-    def __init__(self, host):
-        ImmCommand.__init__(self, command='power on', host=host)
+    def __init__(self, host, cluster):
+        ImmCommand.__init__(self, cluster=cluster, command='power on', host=host)
 
 
 class ImmRebootCommand(ImmCommand):
-    def __init__(self, host):
-        ImmCommand.__init__(self, command='power cycle', host=host)
+    def __init__(self, host, cluster):
+        ImmCommand.__init__(self, cluster=cluster, command='power cycle', host=host)
 
 
 class ImmSoftRebootCommand(ImmCommand):
-    def __init__(self, host):
-        ImmCommand.__init__(self, command='power cycle -s', host=host)
+    def __init__(self, host, cluster):
+        ImmCommand.__init__(self, cluster=cluster, command='power cycle -s', host=host)
 
 
 class ImmStateCommand(ImmCommand):
-    def __init__(self, host):
-        ImmCommand.__init__(self, command='power state', host=host)
+    def __init__(self, host, cluster):
+        ImmCommand.__init__(self, cluster=cluster, command='power state', host=host)
 
     def run(self):
         out, err = ImmCommand.run(self)
@@ -673,16 +675,15 @@ class FullImmStatusCommand(FullStatusCommand):
     """
     returns  the full status of a idpx node
     """
-    def __init__(self, host, adminhost, masternode):
+    def __init__(self, host, adminhost, masternode, cluster):
         """
         constructor
         """
         FullStatusCommand.__init__(self, host, masternode)
-        #host =".".join(host.split(".")[0:-1]) + ".ipmi"#this is run on the ipmi interface
-        self.addCommand(ImmStateCommand(adminhost))
+        self.addCommand(ImmStateCommand(adminhost, cluster))
 
 
-## blade
+# blade
 class BladeCommand(SshCommand):
     """
     commands for blades
@@ -690,7 +691,6 @@ class BladeCommand(SshCommand):
     """
     def __init__(self, chassisname, slot, command):
         command = "%s -T system:blade[%s]" % (command, slot)
-        #TODO: config
         SshCommand.__init__(self, command=command, host=chassisname, user=get_config("BLADEUSER"),
                             passwd=get_config("BLADEPASSWD"))
 
@@ -744,11 +744,11 @@ class FullBladeStatusCommand(FullStatusCommand):
         constructor
         """
         FullStatusCommand.__init__(self, host, masternode)
-        #this is run on the mmodule interface
+        # this is run on the mmodule interface
         self.addCommand(BladeStateCommand(chassisname, slot))
 
 
-#drac
+# drac
 class DracCommand(Command):
     """
     commands for dracs
@@ -766,11 +766,6 @@ class DracPoweroffCommand(DracCommand):
 class DracPoweronCommand(DracCommand):
     def __init__(self, adminhost):
         DracCommand.__init__(self, adminhost, "powerup")
-
-    #this is not soft!
-#class DracSoftRebootCommand(DracCommand):
-#    def __init__(self, adminhost):
-#        DracCommand.__init__(self, adminhost, "powercycle")
 
 
 class DracRebootCommand(DracCommand):
@@ -807,95 +802,61 @@ class DracFullStatusCommand(FullStatusCommand):
         constructor
         """
         FullStatusCommand.__init__(self, host, masternode)
-        #this is run on the mmodule interface
+        # this is run on the mmodule interface
         self.addCommand(DracStatusCommand(adminhost))
 
 
-#ipmitool commands (crappy bmc and HP gen8)
-#TODO: should work on all clusters
-#TODO: should use python-api for ipmitool.
+# ipmitool commands (crappy bmc and HP gen8)
+# TODO: write an python-api for ipmitool.
 class IpmiCommand(Command):
     """
     commands for ipmi enabled bmc/dracs
     """
-    _PROTOCOL = 'lanplus'
-    def __init__(self, hostname, command):
-        #TODO: don't hard code this here
-        if "gulpin" in hostname or 'dugtrio' in hostname or 'delcatty' in hostname:
-            user = get_config("GULPIN_IMMUSER")
-        else:
-            user = get_config("IMMUSER")
+    PROTOCOL = 'lanplus'
 
+    def __init__(self, hostname, clustername, command):
         command = "sudo ipmitool -I %s -H %s -U %s -P '%s' chassis power %s" % \
-            (self._PROTOCOL, hostname, user, get_config("CBMCPASSWD"), command)
+                  (self.PROTOCOL, hostname, get_config('IMM_USER_%s' % clustername.upper()), get_config('IMMPASSWD'),
+                   command)
         Command.__init__(self, command)
 
 
-
 class IpmiPoweroffCommand(IpmiCommand):
-    def __init__(self, hostname):
-        IpmiCommand.__init__(self, hostname, "off")
+    def __init__(self, hostname, clustername):
+        IpmiCommand.__init__(self, hostname, clustername, "off")
 
-class OpenIpmiPoweroffCommand(IpmiPoweroffCommand):
-    _PROTOCOL = OPEN
 
 class IpmiSoftPoweroffCommand(IpmiCommand):
-    def __init__(self, hostname):
-        IpmiCommand.__init__(self, hostname, "soft")
+    def __init__(self, hostname, clustername):
+        IpmiCommand.__init__(self, hostname, clustername, "soft")
 
-class OpenIpmiSoftPoweroffCommand(IpmiSoftPoweroffCommand):
-    _PROTOCOL = OPEN
 
 class IpmiPoweronCommand(IpmiCommand):
-    def __init__(self, hostname):
-        IpmiCommand.__init__(self, hostname, "on")
-    #this is not soft
-#class CBmcSoftRebootCommand(IpmiCommand):
-#    def __init__(self, hostname):
-#        IpmiCommand.__init__(self, hostname, "cycle")
+    def __init__(self, hostname, clustername):
+        IpmiCommand.__init__(self, hostname, clustername, "on")
 
-
-class OpenIpmiPoweronCommand(IpmiPoweronCommand):
-    _PROTOCOL = OPEN
 
 class IpmiRebootCommand(IpmiCommand):
-    def __init__(self, hostname):
-        IpmiCommand.__init__(self, hostname, "reset")
+    def __init__(self, hostname, clustername):
+        IpmiCommand.__init__(self, hostname, clustername, "reset")
 
-class OpenIpmiRebootCommand(IpmiRebootCommand):
-    _PROTOCOL =  OPEN
 
 class IpmiStatusCommand(IpmiCommand):
-    def __init__(self, hostname):
-        IpmiCommand.__init__(self, hostname, "status")
+    def __init__(self, hostname, clustername):
+        IpmiCommand.__init__(self, hostname, clustername, "status")
 
-class OpenIpmiStatusCommand(IpmiStatusCommand):
-    _PROTOCOL = OPEN
 
 class IpmiFullStatusCommand(FullStatusCommand):
     """
     returns  the full status of a blade node
     """
-    def __init__(self, host, adminhost, masternode):
+    def __init__(self, host, clustername, adminhost, masternode):
         """
         constructor
         """
         FullStatusCommand.__init__(self, host, masternode)
-        #this is run on the nat
-        self.addCommand(IpmiStatusCommand(adminhost))
-
-
-class OpenIpmiFullStatusCommand(FullStatusCommand):
-    """
-    returns  the full status of a blade node
-    """
-    def __init__(self, host, adminhost, masternode):
-        """
-        constructor
-        """
-        FullStatusCommand.__init__(self, host, masternode)
-        #this is run on the nat
-        self.addCommand(OpenIpmiStatusCommand(adminhost))
+        # this is run on the nat
+        self.addCommand(IpmiStatusCommand(adminhost, clustername))
 
 
 class DMTFSMASHCLPLEDOnCommand(SshCommand):
@@ -909,8 +870,9 @@ class DMTFSMASHCLPLEDOnCommand(SshCommand):
         constructor, turns on the location led of the node
         """
         cmd = "start /system1/led1"
-        #these are quite slow to respond
-        SshCommand.__init__(self, command=cmd, host=adminhost, user='USERID', passwd=get_config("IMMPASSWD"), timeout=30)
+        # these are quite slow to respond
+        SshCommand.__init__(self, command=cmd, host=adminhost, user='USERID', passwd=get_config("IMMPASSWD"),
+                            timeout=30)
 
 
 class DMTFSMASHCLPLEDOffCommand(SshCommand):
@@ -924,7 +886,8 @@ class DMTFSMASHCLPLEDOffCommand(SshCommand):
         constructor, turns on the location led of the node
         """
         cmd = "stop /system1/led1"
-        SshCommand.__init__(self, command=cmd, host=adminhost, user='USERID', passwd=get_config("IMMPASSWD"), timeout=30)
+        SshCommand.__init__(self, command=cmd, host=adminhost, user='USERID', passwd=get_config("IMMPASSWD"),
+                            timeout=30)
 
 
 class NotSupportedCommand(Command):
@@ -947,7 +910,7 @@ class TestCommand(Command):
         return "running testcommand: %s" % self.command, None
 
 
-## Exceptions
+# Exceptions
 class NetworkCommandException(Exception):
     """
     NetworkCommandException

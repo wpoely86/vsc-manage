@@ -60,7 +60,6 @@ PACKAGE = {
     'scripts': ['bin/misty.py'],
     'data_files': [('/etc', ['config/manage_defaults.cfg'])],
     'install_requires': [
-        'libxml2-python',
         'paramiko',
         'pycrypto >= 1.9',
     ],

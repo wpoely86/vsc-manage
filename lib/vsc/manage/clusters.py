@@ -39,8 +39,7 @@ import os
 import re
 from vsc.manage.nodes import CompositeNode, MasterNode, StorageNode, DracMasterNode, \
     CuboneWorkerNode, BladeWorkerNode, ImmMasterNode, ImmWorkerNode, \
-    IpmiWorkerNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode, \
-    OpenIpmiWorkerNode, OpenIpmiMasterNode
+    IpmiWorkerNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode
 from vsc.manage.managecommands import PBSStateCommand
 from vsc.manage.config import get_config
 from vsc.utils import fancylogger
@@ -315,9 +314,9 @@ class Cluster(object):
 # create the cluster commands from quattor xml files
 # instead of giving them here (or in the nodes file)
 #
-class cubone(Cluster):
+class shuppet(Cluster):
     """
-    this class represents the cubone cluster
+    this class represents the shuppet cluster
     """
     group_by_chassis = False
 
@@ -327,27 +326,9 @@ class cubone(Cluster):
         sets the nodeclass
         """
         Cluster.__init__(self)
-        self.workerNodeClass = CuboneWorkerNode
+        self.workerNodeClass = ImmWorkerNode
         self.masterNodeClass = BladeMasterNode
         self.storageNodeClass = StorageNode
-
-
-class gengar(Cluster):
-    """
-    this class represents the gengar cluster
-    """
-
-    group_by_chassis = True  # set group by chassis option
-
-    def __init__(self):
-        """
-        constructor
-        sets the nodeclass
-        """
-        Cluster.__init__(self)
-        self.workerNodeClass = BladeWorkerNode
-        self.masterNodeClass = ImmMasterNode
-        # self.storageNodeClass = DsaStorageNode
 
 
 class haunter(Cluster):
@@ -436,8 +417,8 @@ class phanpy(Cluster):
         sets the nodeclass
         """
         Cluster.__init__(self)
-        self.workerNodeClass = OpenIpmiWorkerNode  # hp gen9
-        self.masterNodeClass = OpenIpmiMasterNode
+        self.workerNodeClass = DMTFSMASHCLPIpmiWorkerNode  # hp gen9
+        self.masterNodeClass = DMTFSMASHCLPIpmiMasterNode
 
 
 class golett(phanpy, Cluster):
