@@ -314,26 +314,6 @@ class Node(Worker):
             self.log.raiseException("No file found for node %s in %s" % (self, path), NodeException)
         return path
 
-    def _getQuattorElementFromXML(self, xpath, path):
-        """
-        get quattor files and parse the xml, and return the content
-        of a given xpath
-        """
-        # parse xml
-        # optional if using xml for quattor, make sure this is on your system
-        import libxml2
-        doc = libxml2.parseFile(path)
-        ctxt = doc.xpathNewContext()
-        res = ctxt.xpathEval(xpath)
-        if len(res) > 0:
-            content = res[0].getContent()
-        else:
-            content = ""
-        self.log.debug("element %s: %s found for %s" % (xpath, content, self))
-        doc.freeDoc()
-        ctxt.xpathFreeContext()
-        return content
-
     def _getQuattorElementFromJSON(self, jsonpath, path):
         """
         Get quattor files and parse the json and return the content
@@ -352,14 +332,8 @@ class Node(Worker):
         find location,chassis of this node using quattor
         """
         path = self._getQuattorPath()
-        filename = path.split("/")[-1]
-        if "xml" in filename:
-            location = self._getQuattorElementFromXML(get_config("LOCATION_XPATH"), path)
-        elif "json" in filename:
-            location = self._getQuattorElementFromJSON(get_config("LOCATION_JSON"), path)
-
+        location = self._getQuattorElementFromJSON(get_config("LOCATION_JSON"), path)
         self.log.debug("location: %s" % location)
-
         content1 = re.search(get_config("QUATTOR_LOCATION_STRING_REGEX"), location)
 
         if len(location) < 1 or not content1:
@@ -367,7 +341,6 @@ class Node(Worker):
             return location, "None"
 
         # parse  content
-
         values1 = content1.groupdict()
         chassis = int(values1['chassis'])
         slot = int(values1['slot'])
