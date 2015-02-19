@@ -39,8 +39,7 @@ import os
 import re
 from vsc.manage.nodes import CompositeNode, MasterNode, StorageNode, DracMasterNode, \
     CuboneWorkerNode, BladeWorkerNode, ImmMasterNode, ImmWorkerNode, \
-    IpmiWorkerNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode, \
-    OpenIpmiWorkerNode, OpenIpmiMasterNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode
+    IpmiWorkerNode, DMTFSMASHCLPIpmiWorkerNode, DMTFSMASHCLPIpmiMasterNode, BladeMasterNode
 from vsc.manage.managecommands import PBSStateCommand
 from vsc.manage.config import get_config
 from vsc.utils import fancylogger
@@ -123,13 +122,15 @@ class Cluster(object):
         and represents a file in the quattor dir
         """
         if not os.path.exists(get_config("QUATTOR_PATH")):
-            self.log.raiseException("Path %s not found, is this not a quattor server?" % get_config("QUATTOR_PATH"), QuattorException)
+            self.log.raiseException("Path %s not found, is this not a quattor server?" % get_config("QUATTOR_PATH"),
+                                    QuattorException)
         filelistAll = os.listdir(get_config("QUATTOR_PATH"))
         self.log.debug("matching files for regex %s" % regex.pattern)
         nodenames = []
         for filename in filelistAll:
-            # The compiled versions of the most recent patterns passed to re.match(), re.search() or re.compile() are cached,
-            # so programs that use only a few regular expressions at a time needn't worry about compiling regular expressions.
+            # The compiled versions of the most recent patterns passed to re.match(), re.search() or re.compile() are
+            # cached so programs that use only a few regular expressions at a time needn't worry about compiling regular
+            # expressions.
             m = regex.match(filename)
             if m:
                 nodenames.append(m.group('id'))
@@ -286,7 +287,7 @@ class Cluster(object):
         fancylogger.getLogger("clusters.getCluster").raiseException("No such cluster %s" % name, NoSuchClusterException)
     getCluster = staticmethod(getCluster)
 
-        # static method
+    # static method
     def getDefaultCluster():
         """
         static method
@@ -313,9 +314,9 @@ class Cluster(object):
 # create the cluster commands from quattor xml files
 # instead of giving them here (or in the nodes file)
 #
-class cubone(Cluster):
+class shuppet(Cluster):
     """
-    this class represents the cubone cluster
+    this class represents the shuppet cluster
     """
     group_by_chassis = False
 
@@ -325,27 +326,9 @@ class cubone(Cluster):
         sets the nodeclass
         """
         Cluster.__init__(self)
-        self.workerNodeClass = CuboneWorkerNode
+        self.workerNodeClass = ImmWorkerNode
         self.masterNodeClass = BladeMasterNode
         self.storageNodeClass = StorageNode
-
-
-class gengar(Cluster):
-    """
-    this class represents the gengar cluster
-    """
-
-    group_by_chassis = True  # set group by chassis option
-
-    def __init__(self):
-        """
-        constructor
-        sets the nodeclass
-        """
-        Cluster.__init__(self)
-        self.workerNodeClass = BladeWorkerNode
-        self.masterNodeClass = ImmMasterNode
-        # self.storageNodeClass = DsaStorageNode
 
 
 class haunter(Cluster):
@@ -434,12 +417,14 @@ class phanpy(Cluster):
         sets the nodeclass
         """
         Cluster.__init__(self)
-        self.workerNodeClass = OpenIpmiWorkerNode  # hp gen9
-        self.masterNodeClass = OpenIpmiMasterNode
+        self.workerNodeClass = DMTFSMASHCLPIpmiWorkerNode  # hp gen9
+        self.masterNodeClass = DMTFSMASHCLPIpmiMasterNode
+
 
 class golett(phanpy, Cluster):
     """This class represents the gollet cluster, it's equal to phanpy"""
     pass
+
 
 class delcatty(Cluster):
     """

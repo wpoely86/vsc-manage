@@ -34,10 +34,6 @@ except ImportError:
     import simplejson as json
 
 import gzip
-try:
-    import libxml2
-except ImportError:
-    pass  # we will fail later
 import os
 import re
 import threading
@@ -57,9 +53,8 @@ from managecommands import BladeSoftPoweroffCommand, BladePoweronCommand, \
     ImmPoweronCommand, ImmPoweroffCommand, ImmRebootCommand, \
     FullImmStatusCommand, MoabPauseCommand, MoabResumeCommand, MoabRestartCommand, \
     Worker, NotSupportedCommand, DMTFSMASHCLPLEDOnCommand, \
-    DMTFSMASHCLPLEDOffCommand, FixDownOnErrorCommand, \
-    OpenIpmiFullStatusCommand, OpenIpmiPoweronCommand, \
-    OpenIpmiPoweroffCommand, OpenIpmiSoftPoweroffCommand, OpenIpmiRebootCommand
+    DMTFSMASHCLPLEDOffCommand, FixDownOnErrorCommand
+
 
 class Node(Worker):
     """
@@ -115,7 +110,7 @@ class Node(Worker):
         self.chassisname = None
         self.masternode = masternode
 
-        #TODO: (medium) allow for initializing this with the commands thing above
+        # TODO: (medium) allow for initializing this with the commands thing above
         # so no overwriting is needed, these can be parsed from quattor
         # see ticket 469
 
@@ -288,7 +283,7 @@ class Node(Worker):
             command = self.customcmd
         self._adcommand(command)
 
-    #TODO: (medium)  implement shutdown:
+    # TODO: (medium)  implement shutdown:
     # try softpoweroff first
     # if this fails, then powercut
     # we need some state for this, like a daemon running on the master, or fork to background?
@@ -319,24 +314,6 @@ class Node(Worker):
             self.log.raiseException("No file found for node %s in %s" % (self, path), NodeException)
         return path
 
-    def _getQuattorElementFromXML(self, xpath, path):
-        """
-        get quattor files and parse the xml, and return the content
-        of a given xpath
-        """
-        # parse xml
-        doc = libxml2.parseFile(path)
-        ctxt = doc.xpathNewContext()
-        res = ctxt.xpathEval(xpath)
-        if len(res) > 0:
-            content = res[0].getContent()
-        else:
-            content = ""
-        self.log.debug("element %s: %s found for %s" % (xpath, content, self))
-        doc.freeDoc()
-        ctxt.xpathFreeContext()
-        return content
-
     def _getQuattorElementFromJSON(self, jsonpath, path):
         """
         Get quattor files and parse the json and return the content
@@ -355,14 +332,8 @@ class Node(Worker):
         find location,chassis of this node using quattor
         """
         path = self._getQuattorPath()
-        filename = path.split("/")[-1]
-        if "xml" in filename:
-            location = self._getQuattorElementFromXML(get_config("LOCATION_XPATH"), path)
-        elif "json" in filename:
-            location = self._getQuattorElementFromJSON(get_config("LOCATION_JSON"), path)
-
+        location = self._getQuattorElementFromJSON(get_config("LOCATION_JSON"), path)
         self.log.debug("location: %s" % location)
-
         content1 = re.search(get_config("QUATTOR_LOCATION_STRING_REGEX"), location)
 
         if len(location) < 1 or not content1:
@@ -370,7 +341,6 @@ class Node(Worker):
             return location, "None"
 
         # parse  content
-
         values1 = content1.groupdict()
         chassis = int(values1['chassis'])
         slot = int(values1['slot'])
@@ -545,7 +515,8 @@ class CompositeNode(Node):
         if not self.status or forced:
             if threaded:
                 if group_by_chassis:
-                    for node in self._doThreading("getStatus", args={'threaded': False}, group_by_chassis=group_by_chassis):
+                    for node in self._doThreading("getStatus", args={'threaded': False},
+                                                  group_by_chassis=group_by_chassis):
                         self.log.debug("adding status for %s" % str(node[1]))
                         statusses.extend(node[1])
                 else:
@@ -569,22 +540,23 @@ class CompositeNode(Node):
                                     " this is not allowed!")
         self.threads = []
         outputs = []
-        # creating threads and getting results as discussed here: http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
+        # creating threads and getting results as discussed here:
+        # http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
         if group_by_chassis:
             group = self.getNodesPerChassis()
         else:
             group = self
         for node in group.getNodes():
             # commands are ran in parrallel, but serial on each node
-            #TODO (high): group by chassis to avoid overloading!
+            # TODO (high): group by chassis to avoid overloading!
             out = []
             self.log.debug("running %s on %s with args: %s" % (method, node, args))
             t, out = _dothreading(node, method, args)
-            #TODO: use a thread pool?
+            # TODO: use a thread pool?
             self.threads.append([t, out])
             t.start()
         for t, out in self.threads:
-            #TODO: (low) print progress? http://stackoverflow.com/questions/3160699/python-progress-bar
+            # TODO: (low) print progress? http://stackoverflow.com/questions/3160699/python-progress-bar
             t.join()
             # get result from each thread and append it to the result here
             self.log.debug("thread %s on node %s completed, result: %s" % (t, out[0], out[1]))
@@ -688,7 +660,9 @@ class CompositeNode(Node):
         """
         nodeofflinelist = []
         for node in self.getNodes():
-            nodeofflinelist.append(get_config('NODENAME_TPL') % {'nodeid': node.nodeid, 'clustername': node.clustername})
+            nodeofflinelist.append(get_config('NODENAME_TPL') % {
+                'nodeid': node.nodeid, 'clustername': node.clustername,
+            })
         if len(nodeofflinelist) < 1:
             self.log.raiseException("No Nodes selected to set offline")
         master = self.getMaster()
@@ -1040,7 +1014,7 @@ class StorageNode(SpecialNode):
     """
     storage node implementation
     """
-    #TODO (later) #466 implement
+    # TODO (later) #466 implement
     def __init__(self, nodeid, clustername):
         SpecialNode.__init__(self, nodeid, clustername, None)
 
@@ -1108,10 +1082,10 @@ class ImmNode(Node):
             'nodeid': self.nodeid,
             'clustername': self.clustername,
         }
-        self.statusCommand = FullImmStatusCommand(host, adminhost, self.getMaster())
-        self.poweronCommand = ImmPoweronCommand(adminhost)
-        self.poweroffCommand = ImmPoweroffCommand(adminhost)
-        self.rebootCommand = ImmRebootCommand(adminhost)
+        self.statusCommand = FullImmStatusCommand(host, adminhost, self.getMaster(), clustername)
+        self.poweronCommand = ImmPoweronCommand(adminhost, clustername)
+        self.poweroffCommand = ImmPoweroffCommand(adminhost, clustername)
+        self.rebootCommand = ImmRebootCommand(adminhost, clustername)
         self.ledoffcommand = NotSupportedCommand("ledoff")
         self.ledoncommand = NotSupportedCommand("ledon")
 
@@ -1152,9 +1126,9 @@ class CuboneWorkerNode(BladeNode, WorkerNode):
     def __init__(self, nodeid, clustername, masternode):
         WorkerNode.__init__(self, nodeid, clustername, masternode)
         BladeNode.__init__(self, nodeid, clustername, masternode)
-        # self.poweronCommand = TestCommand("poweron on %s.%s" % (nodeid, clustername))
-        # self.poweroffCommand = TestCommand("poweroff on %s.%s" % (nodeid, clustername))
-        # self.rebootCommand = TestCommand("reboot on %s.%s" % (nodeid, clustername))
+        self.poweronCommand = TestCommand("poweron on %s.%s" % (nodeid, clustername))
+        self.poweroffCommand = TestCommand("poweroff on %s.%s" % (nodeid, clustername))
+        self.rebootCommand = TestCommand("reboot on %s.%s" % (nodeid, clustername))
 
 
 class CuboneMasterNode(BladeNode, MasterNode):
@@ -1212,28 +1186,11 @@ class IpmiNode(Node):
         Node.__init__(self, nodeid, clustername, masternode)
         adminhost = self.immname
         hostname = self.hostname
-        self.statusCommand = IpmiFullStatusCommand(hostname, adminhost, self.getMaster())
-        self.poweronCommand = IpmiPoweronCommand(adminhost)
-        self.poweroffCommand = IpmiPoweroffCommand(adminhost)
-        self.softpoweroffCommand = IpmiSoftPoweroffCommand(adminhost)
-        self.rebootCommand = IpmiRebootCommand(adminhost)
-        self.ledoffcommand = NotSupportedCommand("ledoff")
-        self.ledoncommand = NotSupportedCommand("ledon")
-
-
-class OpenIpmiNode(Node):
-    """
-    Implementation of a node using the OpenIpmi commands
-    """
-    def __init__(self, nodeid, clustername, masternode):
-        Node.__init__(self, nodeid, clustername, masternode)
-        adminhost = self.immname
-        hostname = self.hostname
-        self.statusCommand = OpenIpmiFullStatusCommand(hostname, adminhost, self.getMaster())
-        self.poweronCommand = OpenIpmiPoweronCommand(adminhost)
-        self.poweroffCommand = OpenIpmiPoweroffCommand(adminhost)
-        self.softpoweroffCommand = OpenIpmiSoftPoweroffCommand(adminhost)
-        self.rebootCommand = OpenIpmiRebootCommand(adminhost)
+        self.statusCommand = IpmiFullStatusCommand(hostname, clustername, adminhost, self.getMaster())
+        self.poweronCommand = IpmiPoweronCommand(adminhost, clustername)
+        self.poweroffCommand = IpmiPoweroffCommand(adminhost, clustername)
+        self.softpoweroffCommand = IpmiSoftPoweroffCommand(adminhost, clustername)
+        self.rebootCommand = IpmiRebootCommand(adminhost, clustername)
         self.ledoffcommand = NotSupportedCommand("ledoff")
         self.ledoncommand = NotSupportedCommand("ledon")
 
@@ -1247,15 +1204,6 @@ class IpmiMasterNode(IpmiNode, MasterNode):
         IpmiNode.__init__(self, nodeid, clustername, self)
 
 
-class OpenIpmiMasterNode(OpenIpmiNode, MasterNode):
-    """
-    Implementation of a node using the ipmi commands
-    """
-    def __init__(self, nodeid, clustername):
-        MasterNode.__init__(self, nodeid, clustername)
-        OpenIpmiNode.__init__(self, nodeid, clustername, self)
-
-
 class IpmiWorkerNode(IpmiNode, WorkerNode):
     """
     Implementation of a node using the ipmi commands
@@ -1263,15 +1211,6 @@ class IpmiWorkerNode(IpmiNode, WorkerNode):
     def __init__(self, nodeid, clustername, masternode):
         WorkerNode.__init__(self, nodeid, clustername, masternode)
         IpmiNode.__init__(self, nodeid, clustername, masternode)
-
-
-class OpenIpmiWorkerNode(OpenIpmiNode, WorkerNode):
-    """
-    Implementation of a node using the ipmi commands
-    """
-    def __init__(self, nodeid, clustername, masternode):
-        WorkerNode.__init__(self, nodeid, clustername, masternode)
-        OpenIpmiNode.__init__(self, nodeid, clustername, masternode)
 
 
 class DMTFSMASHCLPNode(Node):
