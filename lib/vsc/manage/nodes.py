@@ -660,8 +660,9 @@ class CompositeNode(Node):
         """
         nodeofflinelist = []
         for node in self.getNodes():
-            nodeofflinelist.append(get_config('NODENAME_TPL') % {'nodeid': node.nodeid, 'clustername':
-                                   node.clustername})
+            nodeofflinelist.append(get_config('NODENAME_TPL') % {
+                'nodeid': node.nodeid, 'clustername': node.clustername,
+            })
         if len(nodeofflinelist) < 1:
             self.log.raiseException("No Nodes selected to set offline")
         master = self.getMaster()
