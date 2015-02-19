@@ -1,5 +1,5 @@
 ##
-# Copyright 2011-2013 Ghent University
+# Copyright 2011-2015 Ghent University
 #
 # This file is part of vsc-manage,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -31,7 +31,7 @@ from ConfigParser import NoSectionError
 from vsc.utils.generaloption import GeneralOption
 
 
-## Configfiles
+# Configfiles
 # this one is shipped with the rpm
 DEFAULT_CONFIGFILE = '/etc/manage_defaults.cfg'
 # this one is if you want to overwrite some fo the the defaults with your own, without having to edit the original
@@ -47,9 +47,9 @@ def parseoptions():
     """
     Parses the options
     """
-    #be as restrictive as possible
-    #TODO: add softreboot, watch out, dracsoftreboot is actually stil pretty hard!
-    #so implement properly
+    # be as restrictive as possible
+    # TODO: add softreboot, watch out, dracsoftreboot is actually stil pretty hard!
+    # so implement properly
     # {longopt:(help_description,type,action,default_value,shortopt),}
     parser = ManageOptionParser(go_configfiles=[DEFAULT_CONFIGFILE] + CONFIGFILES,
                                 go_mainbeforedefault=True,
@@ -64,9 +64,9 @@ def parseoptions():
         parser.log.error("You trying to restart the scheduler"
                          "without the --forced option, do you know what you are doing?")
 
-    #TODO: (low) more options checking? - running without option doesn't show a usage flag?
+    # TODO: (low) more options checking? - running without option doesn't show a usage flag?
 
-    #args should be empty, since everything is optional
+    # args should be empty, since everything is optional
     if len(parser.args) > 1:
         parser.log.error("Invalid arguments")
 
@@ -91,9 +91,13 @@ def get_config(name=None):
         try:
             return CONFIG[name.lower()]
         except KeyError:
-            LOGGER.raiseException("Error: Could not find configuration for '%s', make sure it is in %s or is properly "
-                                  "added in %s, or alternatively change the location of these config files in %s" %
-                                  (name, DEFAULT_CONFIGFILE, CONFIGFILES, __file__))
+            try:
+                return CONFIG[name.upper()]
+            except KeyError:
+                LOGGER.raiseException("Error: Could not find configuration for '%s' or '%s', make sure it is in %s or"
+                                      " is properly added in %s, or alternatively change the location of these config"
+                                      " files in %s" % (name.lower(), name.upper(), DEFAULT_CONFIGFILE, CONFIGFILES,
+                                                        __file__))
     return CONFIG
 
 
@@ -120,7 +124,7 @@ class Options(object):
         self.ack_service = None
         self.downtime = None
         self.comment = None
-        #actions
+        # actions
         self.state = False
         self.poweron = False
         self.setonline = False
@@ -138,7 +142,7 @@ class Options(object):
         self.ledon = False
         self.ledoff = False
         self.co = None
-        #node selection
+        # node selection
         self.storage = False
         self.cluster = None
         self.master = None
@@ -151,7 +155,7 @@ class Options(object):
         self.idle = False
         self.offline = False
         self.node = ""
-        #cluster actions
+        # cluster actions
         self.pause = False
         self.resume = False
         self.restart = False
@@ -171,8 +175,8 @@ class ManageOptionParser(GeneralOption):
                        None, "store_true", False, "f"),
             "test-run": ("Print what would be done, without actually doing anything", None, 'store_true', False, 't'),
             "non-threaded": ("Disable threading, do commands one by one", None, "store_true", False),
-            "cluster": ("Specify the cluster to run on, When not specified, the script will attempt to detect the current "
-                        "cluster. All operations can only affect one cluster at a time",
+            "cluster": ("Specify the cluster to run on, When not specified, the script will attempt to detect the"
+                        "current cluster. All operations can only affect one cluster at a time",
                         None, "store", None, "C")
         }
         self.add_group_parser(general_optiongroup, ("General Options", "General options for Manage"))
@@ -209,7 +213,7 @@ class ManageOptionParser(GeneralOption):
         """"Set the action options"""
 
         # action selection
-        #TODO (high) don't reboot anything where the sheduling is on
+        # TODO (high) don't reboot anything where the sheduling is on
         descr = ("Node actions", "Use these to select the sepecific action you want to do on the selected node(s)."
                  "You can select multiple actions. They will be run in the order as shown here.")
 
@@ -230,7 +234,7 @@ class ManageOptionParser(GeneralOption):
             "pbsmomrestart": ("Restart pbs_mom on the selected nodes", None, "store_true", False),
             "ledon": ("Turn on the locator led of the selected nodes", None, "store_true", False),
             "ledoff": ("Turn off the locator led of the selected nodes", None, "store_true", False),
-            "fix-downonerror": ("Fix the down on error status (for the selected workernodes)", None, "store_true", False),
+            "fix-downonerror": ("Fix the down on error status (for selected workernodes)", None, "store_true", False),
             "co": ("Run a quattor component on the selected nodes, e.g. spma,cron", "string", "store", None),
         }
         self.add_group_parser(actiongroup, descr)
@@ -239,7 +243,8 @@ class ManageOptionParser(GeneralOption):
         """Set the clusteaction options"""
 
         # actions on a cluster
-        descr = ("Cluster actions", "Use these to select the specific action you want to run on the selected cluster. These are run in the order as listed here")
+        descr = ("Cluster actions", "Use these to select the specific action you want to run on the selected cluster."
+                 "These are run in the order as listed here")
         clusteractiongroup = {
             "pause": ("Pause the scheduler", None, "store_true", False, 'p'),
             "resume": ("Resume the scheduler", None, "store_true", False, 'r'),
@@ -255,9 +260,10 @@ class ManageOptionParser(GeneralOption):
         monitoringgroup = {
             "ack": ("Acknowledge a problem with all selected nodes.", None, "store_true", False),
             "ack-service": ("Acknowledge a problem with a service on all selected nodes", "string", "store", None),
-            "downtime": ("Schedule all selected nodes and it's services for a downtime (in hours)", "string", "store", None),
+            "downtime": ("Schedule all selected nodes and it's services for a downtime (in hours)", "string", "store",
+                         None),
             "comment": ("Set the comment for the acknowledgement or scheduled downtime", "string", "store", None),
-            "imms": ("also select the imms of the selected nodes, this is only used for acknowleding problems to monitoring",
+            "imms": ("also select the imms of the selected nodes, only applies to acknowleding problems to monitoring",
                      None, "store_true", False),
         }
         self.add_group_parser(monitoringgroup, descr)
