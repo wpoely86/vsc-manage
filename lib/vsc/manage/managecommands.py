@@ -374,7 +374,7 @@ class ServerRespondingCommand(SshCommand):
     check if a server is alive (accepting ssh connections and running commands)
     """
     def __init__(self, host=None, timeout=get_config("COMMAND_FAST_TIMEOUT")):
-        SshCommand.__init__(self, command='uname', host=host, user='root', timeout=timeout)
+        SshCommand.__init__(self, command='uname', host=host, timeout=timeout)
 
     def run(self):
         err = None
@@ -624,39 +624,37 @@ class MoabRestartCommand(SshCommand):
 
 
 class ImmCommand(TelnetCommand):
-    def __init__(self, host, cluster, command):
+    COMMAND = 'power state'
+
+    def __init__(self, host, cluster, command=None):
+        if not command:
+            command = self.COMMAND
         TelnetCommand.__init__(self, command=command, host=host, user=get_config("IMM_USER_%s" % cluster.upper()),
                                passwd=get_config("IMMPASSWD"))
 
 
 class ImmPoweroffCommand(ImmCommand):
-    def __init__(self, host, cluster):
-        ImmCommand.__init__(self, cluster=cluster, command='power off', host=host)
+    COMMAND = 'power off'
 
 
 class ImmSoftPoweroffCommand(ImmCommand):
-    def __init__(self, host, cluster):
-        ImmCommand.__init__(self, cluster=cluster, command='power off -s', host=host)
+    COMMAND = 'power off -s'
 
 
 class ImmPoweronCommand(ImmCommand):
-    def __init__(self, host, cluster):
-        ImmCommand.__init__(self, cluster=cluster, command='power on', host=host)
+    COMMAND = 'power on'
 
 
 class ImmRebootCommand(ImmCommand):
-    def __init__(self, host, cluster):
-        ImmCommand.__init__(self, cluster=cluster, command='power cycle', host=host)
+    COMMAND = 'power cycle'
 
 
 class ImmSoftRebootCommand(ImmCommand):
-    def __init__(self, host, cluster):
-        ImmCommand.__init__(self, cluster=cluster, command='power cycle -s', host=host)
+    COMMAND = 'power cycle -s'
 
 
 class ImmStateCommand(ImmCommand):
-    def __init__(self, host, cluster):
-        ImmCommand.__init__(self, cluster=cluster, command='power state', host=host)
+    COMMAND = 'power state'
 
     def run(self):
         out, err = ImmCommand.run(self)
@@ -689,35 +687,34 @@ class BladeCommand(SshCommand):
     commands for blades
     these should be run on the chassis
     """
-    def __init__(self, chassisname, slot, command):
-        command = "%s -T system:blade[%s]" % (command, slot)
-        SshCommand.__init__(self, command=command, host=chassisname, user=get_config("BLADEUSER"),
+    COMMAND = 'power -state'
+
+    def __init__(self, chassisname, slot, command=None):
+        if not command:
+            command = self.COMMAND
+        real_command = "%s -T system:blade[%s]" % (command, slot)
+        SshCommand.__init__(self, command=real_command, host=chassisname, user=get_config("BLADEUSER"),
                             passwd=get_config("BLADEPASSWD"))
 
 
 class BladePoweroffCommand(BladeCommand):
-    def __init__(self, chassisname, slot,):
-        BladeCommand.__init__(self, chassisname, slot, command='power -off')
+    COMMAND = 'power -off'
 
 
 class BladeSoftPoweroffCommand(BladeCommand):
-    def __init__(self, chassisname, slot):
-        BladeCommand.__init__(self, chassisname, slot, command='power -softoff')
+    COMMAND = 'power -softoff'
 
 
 class BladePoweronCommand(BladeCommand):
-    def __init__(self, chassisname, slot):
-        BladeCommand.__init__(self, chassisname, slot, command='power -on')
+    COMMAND = 'power -on'
 
 
 class BladeRebootCommand(BladeCommand):
-    def __init__(self, chassisname, slot):
-        BladeCommand.__init__(self, chassisname, slot, command='power -cycle')
+    COMMAND = 'power -cycle'
 
 
 class BladeStateCommand(BladeCommand):
-    def __init__(self, chassisname, slot):
-        BladeCommand.__init__(self, chassisname, slot, command='power -state')
+    COMMAND = 'power -state'
 
     def run(self):
         """
@@ -753,29 +750,29 @@ class DracCommand(Command):
     """
     commands for dracs
     """
-    def __init__(self, adminhost, command):
-        command = """idracadm -r %s -u root -p '%s' serveraction %s""" % (adminhost, get_config("DRACPASSWD"), command)
-        Command.__init__(self, command=command)
+    COMMAND = 'powerstatus'
+
+    def __init__(self, adminhost, command=None):
+        if not command:
+            command = self.COMMAND
+        real_command = "idracadm -r %s -u root -p '%s' serveraction %s" % (adminhost, get_config("DRACPASSWD"), command)
+        Command.__init__(self, command=real_command)
 
 
 class DracPoweroffCommand(DracCommand):
-    def __init__(self, adminhost):
-        DracCommand.__init__(self, adminhost, "powerdown")
+    COMMAND = 'powerdown'
 
 
 class DracPoweronCommand(DracCommand):
-    def __init__(self, adminhost):
-        DracCommand.__init__(self, adminhost, "powerup")
+    COMMAND = 'powerup'
 
 
 class DracRebootCommand(DracCommand):
-    def __init__(self, adminhost):
-        DracCommand.__init__(self, adminhost, "hardreset")
+    COMMAND = 'hardreset'
 
 
 class DracStatusCommand(DracCommand):
-    def __init__(self, adminhost):
-        DracCommand.__init__(self, adminhost, "powerstatus")
+    COMMAND = 'powerstatus'
 
     def run(self):
         """
@@ -813,37 +810,35 @@ class IpmiCommand(Command):
     commands for ipmi enabled bmc/dracs
     """
     PROTOCOL = 'lanplus'
+    COMMAND = 'status'
 
-    def __init__(self, hostname, clustername, command):
-        command = "sudo ipmitool -I %s -H %s -U %s -P '%s' chassis power %s" % \
-                  (self.PROTOCOL, hostname, get_config('IMM_USER_%s' % clustername.upper()), get_config('IMMPASSWD'),
-                   command)
-        Command.__init__(self, command)
+    def __init__(self, hostname, clustername, command=None):
+        if not command:
+            command = self.COMMAND
+        real_command = "sudo ipmitool -I %s -H %s -U %s -P '%s' chassis power %s" % (
+            self.PROTOCOL, hostname, get_config('IMM_USER_%s' % clustername.upper()), get_config('IMMPASSWD'), command
+        )
+        Command.__init__(self, real_command)
 
 
 class IpmiPoweroffCommand(IpmiCommand):
-    def __init__(self, hostname, clustername):
-        IpmiCommand.__init__(self, hostname, clustername, "off")
+    COMMAND = 'off'
 
 
 class IpmiSoftPoweroffCommand(IpmiCommand):
-    def __init__(self, hostname, clustername):
-        IpmiCommand.__init__(self, hostname, clustername, "soft")
+    COMMAND = 'soft'
 
 
 class IpmiPoweronCommand(IpmiCommand):
-    def __init__(self, hostname, clustername):
-        IpmiCommand.__init__(self, hostname, clustername, "on")
+    COMMAND = 'on'
 
 
 class IpmiRebootCommand(IpmiCommand):
-    def __init__(self, hostname, clustername):
-        IpmiCommand.__init__(self, hostname, clustername, "reset")
+    COMMAND = 'reset'
 
 
 class IpmiStatusCommand(IpmiCommand):
-    def __init__(self, hostname, clustername):
-        IpmiCommand.__init__(self, hostname, clustername, "status")
+    COMMAND = 'status'
 
 
 class IpmiFullStatusCommand(FullStatusCommand):
