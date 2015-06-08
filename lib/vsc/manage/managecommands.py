@@ -41,6 +41,7 @@ import telnetlib
 import time
 import traceback
 import warnings
+import StringIO
 
 # ignore warnings when importing paramiko and it's dependencies
 with warnings.catch_warnings():
@@ -240,14 +241,16 @@ class SshCommand(NetWorkCommand):
             stdout = chan.makefile('rb', bufsize)
             stderr = chan.makefile_stderr('rb', bufsize)
             start = datetime.datetime.now()
-            while datetime.datetime.now() - start < datetime.timedelta(timeout):
+            while datetime.datetime.now() - start < datetime.timedelta(0, timeout):
                 time.sleep(1)
                 if chan.exit_status_ready():
                     exitcode = chan.recv_exit_status()
                     return stdin, stdout, stderr, exitcode
-            # timed out
-            stderr.write('command timed out!')
-            return stdin, stdout, stderr, 256
+            # timed out, no chance of getting stderr here, it timed out.
+            buff = StringIO.StringIO()
+            buff.write('ssh command timed out')
+            buff.seek(0)
+            return stdin, stdout, buff, 256
 
     def __init__(self, command=None, host=None, user="root", port=22, timeout=get_config("COMMAND_TIMEOUT"),
                  passwd=None):
