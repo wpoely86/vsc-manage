@@ -30,7 +30,7 @@ Created on Feb 22, 2012
 '''
 from config import get_config
 from managecommands import SshCommand, Worker
-from vsc import fancylogger
+from vsc.utils import fancylogger
 
 
 class Monitoring(Worker):
@@ -110,7 +110,7 @@ class Icinga(Monitoring):
         command = ";".join(commands)
 
         self.log.debug("creating command %s" % command)
-        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=60)
+        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=6)
         self._adcommand(command)
 
         return True
@@ -149,7 +149,7 @@ class Icinga(Monitoring):
 
         command = ";".join(commands)
         self.log.debug("creating command %s" % command)
-        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=60,)
+        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=6)
         self._adcommand(command)
 
     def acknowledgeService(self, servicename, comment=None):
@@ -187,5 +187,5 @@ class Icinga(Monitoring):
                 commands.append('echo "%s" > %s' % (ack_command, get_config("ICINGA_SOCKET")))
         command = ";".join(commands)
         self.log.debug("creating command %s" % command)
-        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=60,)
+        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=6)
         self._adcommand(command)
