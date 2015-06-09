@@ -30,7 +30,7 @@ Created on Oct 21, 2011
 '''
 from config import get_config
 from subprocess import Popen, PIPE
-from vsc import fancylogger
+from vsc.utils import fancylogger
 import datetime
 import os
 import re
@@ -41,6 +41,7 @@ import telnetlib
 import time
 import traceback
 import warnings
+import StringIO
 
 # ignore warnings when importing paramiko and it's dependencies
 with warnings.catch_warnings():
@@ -104,7 +105,7 @@ class Command(object):
         self.log = fancylogger.getLogger(self.__class__.__name__)
         self.command = command
         self.host = host
-        self.timeout = float(timeout)
+        self.timeout = int(timeout)
 
     def __str__(self):
         return "going to run on %s: %s" % (self.host, str(self.getCommand()))
@@ -200,7 +201,7 @@ class NetWorkCommand(Command):
         self.host = host
         self.user = user
         self.passwd = passwd
-        self.timeout = float(timeout)
+        self.timeout = int(timeout)
 
     def getCommand(self):
         """
@@ -239,8 +240,17 @@ class SshCommand(NetWorkCommand):
             stdin = chan.makefile('wb', bufsize)
             stdout = chan.makefile('rb', bufsize)
             stderr = chan.makefile_stderr('rb', bufsize)
-            exitcode = chan.recv_exit_status()
-            return stdin, stdout, stderr, exitcode
+            start = datetime.datetime.now()
+            while datetime.datetime.now() - start < datetime.timedelta(seconds=timeout):
+                time.sleep(1)
+                if chan.exit_status_ready():
+                    exitcode = chan.recv_exit_status()
+                    return stdin, stdout, stderr, exitcode
+            # timed out, no chance of getting stderr here, it timed out.
+            buff = StringIO.StringIO()
+            buff.write('ssh command timed out')
+            buff.seek(0)
+            return stdin, stdout, buff, 256
 
     def __init__(self, command=None, host=None, user="root", port=22, timeout=get_config("COMMAND_TIMEOUT"),
                  passwd=None):
@@ -277,6 +287,7 @@ class SshCommand(NetWorkCommand):
         # run the command (with a timeout)
         try:
             stdin, stdout, stderr, exitcode = ssh.exec_command(self.command, timeout=self.timeout)
+            self.log.debug('ran ssh.exec_command')
         except Exception, ex:
             # catch the stacktrace
             self.log.info("Problem occured trying to run %s on %s: err (%s): %s" %
@@ -302,6 +313,7 @@ class SshCommand(NetWorkCommand):
 
         try:
             # close our files
+            self.log.debug('closing filehandlers in sshcommand')
             stdin.close()
             stdout.close()
             stderr.close()

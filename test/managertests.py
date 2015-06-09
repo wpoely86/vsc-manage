@@ -143,31 +143,6 @@ class ManageTest(TestCase):
             pass
         else:
             self.fail("manager didn't fail with a NodeException when an unknown node was selected")
-        opts.node = '32x,node120'
-        try:
-            Manager(opts)
-            self.fail("manager didn't fail with unknown node selected")
-        except NodeException:
-            pass
-        else:
-            self.fail("manager didn't fail with a NodeException when an unknown node was selected")
-
-        opts.node = 'node323,node120Xde#'
-        try:
-            Manager(opts)
-            self.fail("manager didn't fail with unknown node selected")
-        except NodeException:
-            pass
-        else:
-            self.fail("manager didn't fail with a NodeException when an unknown node was selected")
-        opts.node = 'node323,node120'
-        try:
-            Manager(opts)
-            self.fail("manager didn't fail with unknown node selected")
-        except NodeException:
-            pass
-        else:
-            self.fail("manager didn't fail with a NodeException when an unknown node was selected")
         opts.node = 'node2201,201,magikarp'
         Manager(opts)
         opts.node = 'node2201-node2205'

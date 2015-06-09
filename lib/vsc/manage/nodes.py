@@ -528,7 +528,7 @@ class CompositeNode(Node):
         self.status = statusses
         return self.status
 
-    def _doThreading(self, method, args=None, group_by_chassis=False):
+    def _doThreading(self, method, args=None, group_by_chassis=False, timeout=None):
         """
         give this method a methodname and optional arguments
         it will perform it threaded on all
@@ -540,6 +540,8 @@ class CompositeNode(Node):
                                     " this is not allowed!")
         self.threads = []
         outputs = []
+        if not timeout:
+            timeout = int(get_config('COMMAND_TIMEOUT')) + 2
         # creating threads and getting results as discussed here:
         # http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
         if group_by_chassis:
@@ -557,7 +559,13 @@ class CompositeNode(Node):
             t.start()
         for t, out in self.threads:
             # TODO: (low) print progress? http://stackoverflow.com/questions/3160699/python-progress-bar
-            t.join()
+            t.join(timeout)
+            if t.is_alive():
+                self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, out[0], out[1])
+                if not out[1]:
+                    out[1] = 'Command timed out'
+                outputs.append(out)
+                continue
             # get result from each thread and append it to the result here
             self.log.debug("thread %s on node %s completed, result: %s" % (t, out[0], out[1]))
             if out[2]:
