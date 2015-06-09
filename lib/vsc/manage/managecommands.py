@@ -241,7 +241,7 @@ class SshCommand(NetWorkCommand):
             stdout = chan.makefile('rb', bufsize)
             stderr = chan.makefile_stderr('rb', bufsize)
             start = datetime.datetime.now()
-            while datetime.datetime.now() - start < datetime.timedelta(0, timeout):
+            while datetime.datetime.now() - start < datetime.timedelta(seconds=timeout):
                 time.sleep(1)
                 if chan.exit_status_ready():
                     exitcode = chan.recv_exit_status()
