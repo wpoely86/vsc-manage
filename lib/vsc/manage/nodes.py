@@ -541,7 +541,7 @@ class CompositeNode(Node):
         self.threads = []
         outputs = []
         if not timeout:
-            timeout =  int(get_config('COMMAND_TIMEOUT'))
+            timeout = int(get_config('COMMAND_TIMEOUT')) + 2
         # creating threads and getting results as discussed here:
         # http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
         if group_by_chassis:
@@ -561,7 +561,7 @@ class CompositeNode(Node):
             # TODO: (low) print progress? http://stackoverflow.com/questions/3160699/python-progress-bar
             t.join(timeout)
             if t.is_alive():
-                self.log.warning("thread %s on node %s did not complete within timeout, ignoring it" % (t, out[0], out[1]))
+                self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, out[0], out[1])
                 if not out[1]:
                     out[1] = 'Command timed out'
                 outputs.append(out)
