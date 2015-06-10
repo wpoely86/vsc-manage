@@ -1,4 +1,4 @@
-#pppp#
+##
 # Copyright 2011-2013 Ghent University
 #
 # This file is part of vsc-manage,
@@ -563,7 +563,7 @@ class CompositeNode(Node):
             if t.is_alive():
                 self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, str(out))
                 if len(out) < 2:
-                    out.extend('Command timed out')
+                    out.extend(['Command timed out', 256])
                 outputs.append(out)
                 continue
             # get result from each thread and append it to the result here
