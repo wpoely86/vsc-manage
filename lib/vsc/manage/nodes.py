@@ -731,7 +731,7 @@ class CompositeNode(Node):
             nodelist.append(get_config('NODENAME_TPL') % {'nodeid': node.nodeid, 'clustername': node.clustername})
             statusses.append(node.fixdownonerror())
         if len(nodelist) < 1:
-            self.log.raiseException("No nodes selected to set online", NodeException)
+            self.log.raiseException("No nodes selected to fix downonerror on", NodeException)
         self.log.debug("fixdownonerror on compositenode returned %s" % statusses)
         return statusses
 
