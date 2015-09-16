@@ -590,7 +590,7 @@ class PBSStateCommand(SshCommand):
         """
         constructor
         """
-        SshCommand.__init__(self, command='pbsnodes | grep -v status', host=host, user='root', timeout=timeout)
+        SshCommand.__init__(self, command="pbsnodes | grep -v 'status\|jobs'", host=host, user='root', timeout=timeout)
         self.masternode = host
 
     def run(self):
