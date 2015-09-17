@@ -568,7 +568,7 @@ class CompositeNode(Node):
             if t.is_alive():
                 self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, str(out))
                 if len(out) < 2:
-                    out.extend([str(node), [['command timed out', (None, 'command timed out')]], None])
+                    out.extend([node, [['command timed out', (None, 'command timed out')]], None])
                 outputs.append(out)
                 continue
             # get result from each thread and append it to the result here

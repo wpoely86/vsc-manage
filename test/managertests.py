@@ -343,7 +343,7 @@ class ManageTest(TestCase):
                         self.assertEquals(j[1][1], 'command timed out')
                         errors.append(i[0])
 
-        self.assertTrue('node111' in errors)
+        self.assertTrue(testnode in errors)
 
     def testManagerCreatorActionOptions(self):
         """
