@@ -387,10 +387,12 @@ class CompositeNode(Node):
     a compositenode can contain multiple nodes and delegate calls to them
     """
 
-    def __init__(self, clustername=None, masternode=None, nodeid=None):
+    def __init__(self, clustername=None, masternode=None, nodeid=None, timeout=int(get_config('COMMAND_TIMEOUT')) * 1.1):
+
         Node.__init__(self, nodeid, clustername, masternode)  # we're not a real node, so no id
         self.nodes = {}
         self.threads = None
+        self.timeout = timeout
 
     def __str__(self):
         """
@@ -541,7 +543,7 @@ class CompositeNode(Node):
         self.threads = []
         outputs = []
         if not timeout:
-            timeout = int(get_config('COMMAND_TIMEOUT')) + 2
+            timeout = self.timeout
         # creating threads and getting results as discussed here:
         # http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
         if group_by_chassis:
@@ -564,6 +566,8 @@ class CompositeNode(Node):
                 self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, str(out))
                 if len(out) < 2:
                     out.extend(['Command timed out', 256])
+                    #fix:
+                    #out.extend([str(node), [['command timed out', (None, 'command timed out')]], None])
                 outputs.append(out)
                 continue
             # get result from each thread and append it to the result here
