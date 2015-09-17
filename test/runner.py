@@ -7,6 +7,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import test.managertests as m
 import unittest
 
+from vsc.utils import fancylogger
+fancylogger.logToScreen(enable=False)
 
 
 suite = unittest.TestSuite([x.suite() for x in (m,)])
@@ -20,6 +22,3 @@ except ImportError, err:
 if not rs.wasSuccessful():
     sys.exit(1)
 
-if __name__ == '__main__':
-    from vsc.utils import fancylogger
-    fancylogger.logToScreen(enable=True)
