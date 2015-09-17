@@ -60,7 +60,7 @@ def main():
     errors = []
     if out:
         for i in out:  # this is an array of nodes and their  output,err
-            if len(i[1]) > 0:  # only print if something to show
+            if len(i) > 1 and len(i[1]) > 0:  # only print if something to show
                 print "%s:" % i[0]  # first element is the node
                 for j in i[1]:  # second element is an array of [outputs of commands,errors]
                     print "    output: %s" % str(j[1][0])

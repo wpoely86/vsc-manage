@@ -102,14 +102,13 @@ class ManageTest(TestCase):
         test if all clusternames have a class implementing them
         """
         if not os.path.exists(QUATTOR_PATH):
-            print "current wd: %s" % os.getcwd()
-            self.fail("Path not found, check quattor path:%s" % QUATTOR_PATH)
+            self.fail("Path not found, check quattor path:%s , current wd %s" % (QUATTOR_PATH, os.getcwd()))
         # get names from the files in the quattor dir
-        clusternames = set([s.split('.')[1] for s in os.listdir(QUATTOR_PATH)])
+        clusternames = set([s.split('.')[1] for s in os.listdir(QUATTOR_PATH) if len(s.split('.')) > 1])
         for name in clusternames:
             # TODO: add support for non clustered devices: https://github.com/hpcugent/vsc-manage/issues/1
             # ignore unsupported 'clusters'
-            if name not in ('ugent', 'gligar', 'muk', 'altaria', 'zorua', 'gigalith', 'gengar', 'cubone'):
+            if name not in ('ugent', 'gligar', 'muk', 'altaria', 'zorua', 'gigalith', 'gengar', 'cubone', 'hpc'):
                 self.clustertest(name)
 
     def testManagerCreatorNodesFromChassis(self):
@@ -315,7 +314,6 @@ class ManageTest(TestCase):
         opts.cluster = TEST_CLUSTER
         opts.quattor_nodes = True
         manager = Manager(opts)
-        print "showcommands", manager.nodes.showCommands()
         self.assertFalse(bool(manager.nodes.showCommands()))
 
     def testManagerCreatorActionOptions(self):
