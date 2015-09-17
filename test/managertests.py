@@ -36,7 +36,7 @@ from vsc.manage.manage import Manager
 from vsc.manage.clusters import Cluster, NoSuchClusterException
 from vsc.manage.nodes import NodeException
 
-QUATTOR_PATH = os.path.expanduser(get_config("QUATTOR_PATH"))
+QUATTOR_PATH = get_config("QUATTOR_PATH")
 TEST_CLUSTER = 'shuppet'
 TEST_NODE = 'node2201'
 
