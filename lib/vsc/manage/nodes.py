@@ -387,10 +387,15 @@ class CompositeNode(Node):
     a compositenode can contain multiple nodes and delegate calls to them
     """
 
-    def __init__(self, clustername=None, masternode=None, nodeid=None):
+    def __init__(self, clustername=None, masternode=None, nodeid=None, timeout=None):
+
         Node.__init__(self, nodeid, clustername, masternode)  # we're not a real node, so no id
         self.nodes = {}
         self.threads = None
+        if timeout is None:
+            # times 2 to give other commands to timeout before we timeout here
+            timeout = int(get_config('COMMAND_TIMEOUT')) * 2
+        self.timeout = timeout
 
     def __str__(self):
         """
@@ -541,7 +546,7 @@ class CompositeNode(Node):
         self.threads = []
         outputs = []
         if not timeout:
-            timeout = int(get_config('COMMAND_TIMEOUT')) + 2
+            timeout = self.timeout
         # creating threads and getting results as discussed here:
         # http://stackoverflow.com/questions/3239617/how-to-manage-python-threads-results
         if group_by_chassis:
@@ -555,15 +560,15 @@ class CompositeNode(Node):
             self.log.debug("running %s on %s with args: %s" % (method, node, args))
             t, out = _dothreading(node, method, args)
             # TODO: use a thread pool?
-            self.threads.append([t, out])
+            self.threads.append([t, out, node])
             t.start()
-        for t, out in self.threads:
+        for t, out, node in self.threads:
             # TODO: (low) print progress? http://stackoverflow.com/questions/3160699/python-progress-bar
             t.join(timeout)
             if t.is_alive():
-                self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, str(out))
+                self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, str(node))
                 if len(out) < 2:
-                    out.extend(['Command timed out', 256])
+                    out.extend([node, [['command timed out', (None, 'command timed out')]], None])
                 outputs.append(out)
                 continue
             # get result from each thread and append it to the result here

@@ -34,7 +34,8 @@ from unittest import TestCase, TestLoader
 from vsc.manage.config import Options, get_config
 from vsc.manage.manage import Manager
 from vsc.manage.clusters import Cluster, NoSuchClusterException
-from vsc.manage.nodes import NodeException
+from vsc.manage.managecommands import Command
+from vsc.manage.nodes import NodeException, TestNode, CompositeNode
 
 QUATTOR_PATH = get_config("QUATTOR_PATH")
 TEST_CLUSTER = 'shuppet'
@@ -102,7 +103,7 @@ class ManageTest(TestCase):
         test if all clusternames have a class implementing them
         """
         if not os.path.exists(QUATTOR_PATH):
-            self.fail("Path not found, check quattor path:%s , current wd %s" % (QUATTOR_PATH, os.getcwd()))
+            self.fail("Path not found, check quattor path:%s" % QUATTOR_PATH)
         # get names from the files in the quattor dir
         clusternames = set([s.split('.')[1] for s in os.listdir(QUATTOR_PATH) if len(s.split('.')) > 1])
         for name in clusternames:
@@ -194,15 +195,15 @@ class ManageTest(TestCase):
 
     # TODO: test for storage
 
-#    def testManagerSetOnlineOption(self):
-#        """
-#        test the setonline option parameter
-#        """
-#        opts = Options() #default options object
-#        opts.cluster = TEST_CLUSTER
-#        opts.worker = True
-#        opts.setonline = True
-#        Manager(opts)
+    def testManagerSetOnlineOption(self):
+        """
+        test the setonline option parameter
+        """
+        opts = Options()  # default options object
+        opts.cluster = TEST_CLUSTER
+        opts.worker = True
+        opts.setonline = True
+        Manager(opts)
 
     def testManagerSetOnline(self):
         """
@@ -210,7 +211,7 @@ class ManageTest(TestCase):
         """
         opts = Options()  # default options object
         opts.cluster = TEST_CLUSTER
-        opts.node = 'node2201'
+        opts.node = TEST_NODE
         opts.setonline = True
         Manager(opts).doit()
 
@@ -220,7 +221,7 @@ class ManageTest(TestCase):
         """
         opts = Options()  # default options object
         opts.cluster = TEST_CLUSTER
-        opts.node = 'node2201'
+        opts.node = TEST_NODE
         opts.ledon = True
         Manager(opts).doit()
         # TODO: get led status and test if it's on
@@ -239,15 +240,15 @@ class ManageTest(TestCase):
         opts.testrun = True
         Manager(opts).doit()
 
-#    def testManagerSetOfflineOption(self):
-#        """
-#        test the setoffline option parameter
-#        """
-#        opts = Options() #default options object
-#        opts.cluster = TEST_CLUSTER
-#        opts.worker = True
-#        opts.setoffline = True
-#        Manager(opts)
+    def testManagerSetOfflineOption(self):
+        """
+        test the setoffline option parameter
+        """
+        opts = Options()  # default options object
+        opts.cluster = TEST_CLUSTER
+        opts.worker = True
+        opts.setoffline = True
+        Manager(opts)
 
     def testManagerSetOffline(self):
         """
@@ -315,6 +316,42 @@ class ManageTest(TestCase):
         opts.quattor_nodes = True
         manager = Manager(opts)
         self.assertFalse(bool(manager.nodes.showCommands()))
+
+    def testdoitOutput(self):
+        """Test the consistency of the output of manager.doit"""
+        opts = Options()  # default options object
+        opts.cluster = TEST_CLUSTER
+        opts.quattor_nodes = True
+        opts.ledon = True
+        manager = Manager(opts)
+        manager.nodes = CompositeNode(timeout=1)
+        # create a fake node
+        testnode = TestNode('node111', 'localhost', None)
+        # overwrite it's testcommand to be sure it times out
+        testnode.ledoncommand = Command('sleep 3', timeout=1)
+        manager.nodes.add(testnode)
+
+        # make sure this works for multiple nodes
+        testnode2 = TestNode('node112', 'localhost', None)
+        # overwrite it's testcommand to be sure it times out
+        testnode2.ledoncommand = Command('sleep 3', timeout=1)
+        manager.nodes.add(testnode2)
+        # parse actions again so they get applied on the new node
+        manager.parseActions()
+        out = manager.doit()
+        # make sure this output is of a format we can handle
+        errors = []
+        for i in out:
+            if len(i) > 1 and len(i[1]) > 0:
+                for j in i[1]:  # second element is an array of [outputs of commands,errors]
+                    self.assertEquals(j[1][0], None)
+                    if j[1][1]:
+                        self.assertEquals(j[1][1], 'command timed out')
+                        errors.append(i[0])
+
+        # actuall node should be in output, not just the name, because this is also used for printstatussee
+        self.assertTrue(testnode in errors)
+        self.assertTrue(testnode2 in errors)
 
     def testManagerCreatorActionOptions(self):
         """
