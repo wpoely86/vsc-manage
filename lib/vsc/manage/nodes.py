@@ -566,7 +566,7 @@ class CompositeNode(Node):
             # TODO: (low) print progress? http://stackoverflow.com/questions/3160699/python-progress-bar
             t.join(timeout)
             if t.is_alive():
-                self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, str(out))
+                self.log.warning("thread %s on node %s did not complete within timeout, ignoring it", t, str(node))
                 if len(out) < 2:
                     out.extend([node, [['command timed out', (None, 'command timed out')]], None])
                 outputs.append(out)
