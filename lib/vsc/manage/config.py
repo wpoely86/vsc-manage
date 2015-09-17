@@ -89,15 +89,22 @@ def get_config(name=None):
     global CONFIG
     if name is not None:
         try:
-            return CONFIG[name.lower()]
+            config = CONFIG[name.lower()]
         except KeyError:
             try:
-                return CONFIG[name.upper()]
+                config = CONFIG[name.upper()]
             except KeyError:
                 LOGGER.raiseException("Error: Could not find configuration for '%s' or '%s', make sure it is in %s or"
                                       " is properly added in %s, or alternatively change the location of these config"
                                       " files in %s" % (name.lower(), name.upper(), DEFAULT_CONFIGFILE, CONFIGFILES,
                                                         __file__))
+
+        # allow ~ or ~user to be used in paths
+        if name.lower().endswith('_path'):
+            config = os.path.expanduser(config)
+
+        return config
+
     return CONFIG
 
 
