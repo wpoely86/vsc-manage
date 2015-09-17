@@ -328,8 +328,14 @@ class ManageTest(TestCase):
         # create a fake node
         testnode = TestNode('node111', 'localhost', None)
         # overwrite it's testcommand to be sure it times out
-        testnode.ledoncommand =  Command('sleep 3', timeout=1)
+        testnode.ledoncommand = Command('sleep 3', timeout=1)
         manager.nodes.add(testnode)
+
+        # make sure this works for multiple nodes
+        testnode2 = TestNode('node112', 'localhost', None)
+        # overwrite it's testcommand to be sure it times out
+        testnode2.ledoncommand = Command('sleep 3', timeout=1)
+        manager.nodes.add(testnode2)
         # parse actions again so they get applied on the new node
         manager.parseActions()
         out = manager.doit()
@@ -343,7 +349,9 @@ class ManageTest(TestCase):
                         self.assertEquals(j[1][1], 'command timed out')
                         errors.append(i[0])
 
+        # actuall node should be in output, not just the name, because this is also used for printstatussee
         self.assertTrue(testnode in errors)
+        self.assertTrue(testnode2 in errors)
 
     def testManagerCreatorActionOptions(self):
         """

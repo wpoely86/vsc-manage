@@ -560,9 +560,9 @@ class CompositeNode(Node):
             self.log.debug("running %s on %s with args: %s" % (method, node, args))
             t, out = _dothreading(node, method, args)
             # TODO: use a thread pool?
-            self.threads.append([t, out])
+            self.threads.append([t, out, node])
             t.start()
-        for t, out in self.threads:
+        for t, out, node in self.threads:
             # TODO: (low) print progress? http://stackoverflow.com/questions/3160699/python-progress-bar
             t.join(timeout)
             if t.is_alive():
