@@ -330,11 +330,8 @@ class ManageTest(TestCase):
         # overwrite it's testcommand to be sure it times out
         testnode.ledoncommand =  Command('sleep 3', timeout=1)
         manager.nodes.add(testnode)
-        manager.nodes.runCustomCmd('sleep 60')
-        print manager.nodes
         # parse actions again so they get applied on the new node
         manager.parseActions()
-        print manager.nodes
         out = manager.doit()
         # make sure this output is of a format we can handle
         errors = []
