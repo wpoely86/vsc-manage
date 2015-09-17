@@ -394,7 +394,7 @@ class CompositeNode(Node):
         self.threads = None
         if timeout is None:
             # times 2 to give other commands to timeout before we timeout here
-            timeout =int(get_config('COMMAND_TIMEOUT')) * 2
+            timeout = int(get_config('COMMAND_TIMEOUT')) * 2
         self.timeout = timeout
 
     def __str__(self):
