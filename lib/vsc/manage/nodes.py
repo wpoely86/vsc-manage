@@ -387,11 +387,14 @@ class CompositeNode(Node):
     a compositenode can contain multiple nodes and delegate calls to them
     """
 
-    def __init__(self, clustername=None, masternode=None, nodeid=None, timeout=int(get_config('COMMAND_TIMEOUT')) * 1.1):
+    def __init__(self, clustername=None, masternode=None, nodeid=None, timeout=None):
 
         Node.__init__(self, nodeid, clustername, masternode)  # we're not a real node, so no id
         self.nodes = {}
         self.threads = None
+        if timeout is None:
+            # times 2 to give other commands to timeout before we timeout here
+            timeout =int(get_config('COMMAND_TIMEOUT')) * 2
         self.timeout = timeout
 
     def __str__(self):
