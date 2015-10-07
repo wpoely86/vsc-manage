@@ -176,7 +176,7 @@ How it works
 cluster.
  - TODO: allow for a section in the config file to list all your machines per cluster (or group)
 - Then in clusters.py we defined what this cluster is made up of (what master node, what workernode)
- - TODO: Let this also be configureable in the config file
+ - TODO: Let this also be configurable in the config file
 - Then depending on what type of node a different command will be run on that host (or it's ipmi)
  - Commands are first built up, this allows for a dry run, or (TODO) maybe in the future also have a save and undo function for every command.
  - Commands can be ssh, or telnet, we support a lot of ipmi commands, initial support for DTMF SMASH, support for icinga/nagios for automatically scheduling downtime, or acknowledging problems.
