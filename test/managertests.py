@@ -29,20 +29,35 @@ Created on Oct 18, 2011
 @author: Jens Timmerman
 '''
 import os
+import sys
 import traceback
-from unittest import TestCase, TestLoader
+import unittest
+
+# use the default shipped configfile
+from vsc.manage import config
+config.DEFAULT_CONFIGFILE = os.path.join(os.path.dirname(sys.argv[0]),'config/manage_defaults.cfg')
+# get_options will initialize
+config.get_options()
+
+
 from vsc.manage.config import Options, get_config
 from vsc.manage.manage import Manager
 from vsc.manage.clusters import Cluster, NoSuchClusterException
 from vsc.manage.managecommands import Command
 from vsc.manage.nodes import NodeException, TestNode, CompositeNode
 
-QUATTOR_PATH = get_config("QUATTOR_PATH")
+
 TEST_CLUSTER = 'shuppet'
 TEST_NODE = 'node2201'
 
+QUATTOR_PATH = os.environ.get('VSC_MANAGE_QUATTOR_PATH', get_config("QUATTOR_PATH"))
+if not os.path.isdir(QUATTOR_PATH):
+    raise Exception('Cannot find QUATTOR_PATH in %s (set VSC_MANAGE_QUATTOR_PATH envvar)' % QUATTOR_PATH)
+config.CONFIG['QUATTOR_PATH'] = QUATTOR_PATH
+config.CONFIG['QUATTOR_PATH'.lower()] = QUATTOR_PATH
 
-class ManageTest(TestCase):
+
+class ManageTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -406,8 +421,3 @@ class ManageTest(TestCase):
 
         opts.runcmd = "echo hello"
         Manager(opts).doit()  # should create a manager
-
-
-def suite():
-    """ returns all the testcases in this module """
-    return TestLoader().loadTestsFromTestCase(ManageTest)

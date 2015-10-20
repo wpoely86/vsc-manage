@@ -86,6 +86,11 @@ def parseoptions():
 
 def get_config(name=None):
     """Returns the global config dict"""
+    if OPTIONS is None:
+        # the options needs to be parsed at least once
+        # before get_config can be successfully ran
+        parseoptions()
+
     global CONFIG
     if name is not None:
         try:
@@ -110,6 +115,10 @@ def get_config(name=None):
 
 def get_options():
     """Return the global options object"""
+    if OPTIONS is None:
+        # the options needs to be parsed at least once
+        parseoptions()
+
     return OPTIONS
 
 
@@ -274,7 +283,3 @@ class ManageOptionParser(GeneralOption):
                      None, "store_true", False),
         }
         self.add_group_parser(monitoringgroup, descr)
-
-
-# the options needs to be parsed before get_config can be successfully ran
-parseoptions()
