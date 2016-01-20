@@ -31,20 +31,19 @@ vsc-manage distribution setup.py
 @author: Jens Timmerman <jens.timmerman@ugent.be>
 """
 import vsc.install.shared_setup as shared_setup
-from vsc.install.shared_setup import jt, URL_GH_HPCUGENT
+from vsc.install.shared_setup import jt
 
 PACKAGE = {
-    'name': 'vsc-manage',
     'version': '1.7.4',
     'author': [jt],
     'maintainer': [jt],
-    'scripts': ['bin/misty.py'],
     'data_files': [('/etc', ['config/manage_defaults.cfg'])],
     'install_requires': [
+        'vsc-base >= 2.4.16',
         'paramiko',
         'pycrypto >= 1.9',
     ],
 }
 
 if __name__ == '__main__':
-    shared_setup.action_target(PACKAGE, urltemplate=URL_GH_HPCUGENT)
+    shared_setup.action_target(PACKAGE)

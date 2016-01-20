@@ -1,5 +1,5 @@
-##
-# Copyright 2011-2015 Ghent University
+#
+# Copyright 2011-2016 Ghent University
 #
 # This file is part of vsc-manage,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -8,7 +8,7 @@
 # the Hercules foundation (http://www.herculesstichting.be/in_English)
 # and the Department of Economy, Science and Innovation (EWI) (http://www.ewi-vlaanderen.be/en).
 #
-# http://github.com/hpcugent/vsc-manage
+# https://github.com/hpcugent/vsc-manage
 #
 # vsc-manage is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 # You should have received a copy of the GNU General Public License
 # along with vsc-manage.  If not, see <http://www.gnu.org/licenses/>.
 #
-##
 '''
 Created on Oct 18, 2011
 
@@ -31,7 +30,7 @@ Created on Oct 18, 2011
 import os
 import sys
 import traceback
-import unittest
+from vsc.install.testing import TestCase
 
 # use the default shipped configfile
 from vsc.manage import config
@@ -50,24 +49,18 @@ from vsc.manage.nodes import NodeException, TestNode, CompositeNode
 TEST_CLUSTER = 'shuppet'
 TEST_NODE = 'node2201'
 
-QUATTOR_PATH = os.environ.get('VSC_MANAGE_QUATTOR_PATH', get_config("QUATTOR_PATH"))
+QUATTOR_PATH = os.path.join(os.path.dirname(sys.argv[0]),'test/profiles')
 if not os.path.isdir(QUATTOR_PATH):
     raise Exception('Cannot find QUATTOR_PATH in %s (set VSC_MANAGE_QUATTOR_PATH envvar)' % QUATTOR_PATH)
 config.CONFIG['QUATTOR_PATH'] = QUATTOR_PATH
 config.CONFIG['QUATTOR_PATH'.lower()] = QUATTOR_PATH
 
 
-class ManageTest(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+class ManageTest(TestCase):
 
     # TODO: add tests for  options.pause  options.resume and options.restart
 
-    def testChedulerOptions(self):
+    def testSchedulerOptions(self):
         """
         test the cheduler options
         """
@@ -89,7 +82,7 @@ class ManageTest(unittest.TestCase):
             self.fail("Scheduler restart failed with ex %s" % ex)
             print traceback.format_exc()
 
-    def testClustersInQuator(self):
+    def test_ClustersInQuator(self):
         """
         test if all clusters with a class implementing them are in quator
         """

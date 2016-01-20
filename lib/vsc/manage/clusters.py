@@ -1,5 +1,5 @@
-##
-# Copyright 2011-2013 Ghent University
+#
+# Copyright 2011-2016 Ghent University
 #
 # This file is part of vsc-manage,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -8,7 +8,7 @@
 # the Hercules foundation (http://www.herculesstichting.be/in_English)
 # and the Department of Economy, Science and Innovation (EWI) (http://www.ewi-vlaanderen.be/en).
 #
-# http://github.com/hpcugent/vsc-manage
+# https://github.com/hpcugent/vsc-manage
 #
 # vsc-manage is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,8 +22,7 @@
 # You should have received a copy of the GNU General Public License
 # along with vsc-manage.  If not, see <http://www.gnu.org/licenses/>.
 #
-##
-'''
+"""
 Created on Oct 17, 2011
 
 @author: jens
@@ -33,7 +32,7 @@ This module contains cluster classes
 the Cluster class is the abstract class
 To add real clusters extend this class in this file, and it will be automatically detected (based on the class name)
 
-'''
+"""
 import platform
 import os
 import re
@@ -330,69 +329,6 @@ class shuppet(Cluster):
         self.masterNodeClass = BladeMasterNode
         self.storageNodeClass = StorageNode
 
-
-class haunter(Cluster):
-    """
-    this class represents the haunter cluster
-    """
-    def __init__(self):
-        """
-        constructor
-        sets the nodeclass
-        """
-        Cluster.__init__(self)
-        # idpx'en
-        self.workerNodeClass = ImmWorkerNode
-        self.masterNodeClass = ImmMasterNode
-
-
-class dugtrio(Cluster):
-    """
-    this class represents the dugtrio cluster
-    """
-    def __init__(self):
-        """
-        constructor
-        sets the nodeclass
-        """
-        Cluster.__init__(self)
-        # drac
-        self.workerNodeClass = IpmiWorkerNode
-        self.masterNodeClass = DracMasterNode
-
-
-class gastly(Cluster):
-    """
-    this class represents the gastly cluster
-    """
-    group_by_chassis = True  # set group by chassis option
-
-    def __init__(self):
-        """
-        constructor
-        sets the nodeclass
-        """
-        Cluster.__init__(self)
-        # blade
-        self.workerNodeClass = BladeWorkerNode
-        # master3 is drac
-        self.masterNodeClass = DracMasterNode
-
-
-class gulpin(Cluster):
-    """
-    this class represents the gulpin cluster
-    """
-    def __init__(self):
-        """
-        constructor
-        sets the nodeclass
-        """
-        Cluster.__init__(self)
-        self.workerNodeClass = IpmiWorkerNode  # c6100
-        self.masterNodeClass = DracMasterNode
-
-
 class raichu(Cluster):
     """
     this class represents the raichu cluster
@@ -422,7 +358,12 @@ class phanpy(Cluster):
 
 
 class golett(phanpy, Cluster):
-    """This class represents the gollet cluster, it's equal to phanpy"""
+    """This class represents the golett cluster, it's equal to phanpy"""
+    pass
+
+
+class swalot(phanpy, Cluster):
+    """This class represents the swalot cluster, it's equal to phanpy"""
     pass
 
 

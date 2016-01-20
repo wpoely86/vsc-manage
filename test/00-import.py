@@ -1,5 +1,5 @@
 #
-# Copyright 2011-2016 Ghent University
+# Copyright 2016-2016 Ghent University
 #
 # This file is part of vsc-manage,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -22,12 +22,4 @@
 # You should have received a copy of the GNU General Public License
 # along with vsc-manage.  If not, see <http://www.gnu.org/licenses/>.
 #
-"""
-Initialize vsc package.
-The vsc namespace is used in different folders allong the system
-so explicitly declare this is also the vsc namespace
-
-@author: Jens Timmerman <jens.timmerman@ugent.be>
-"""
-import pkg_resources
-pkg_resources.declare_namespace(__name__)
+from vsc.install.testing import VSCImportTest
