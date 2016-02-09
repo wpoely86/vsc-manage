@@ -3,6 +3,9 @@ manage
 
 [![Build Status](https://jenkins1.ugent.be/buildStatus/icon?job=vsc-manage-python26)](https://jenkins1.ugent.be/view/VSC%20tools/job/vsc-manage-python26/)
 
+Description
+===========
+
 manage is a python library to manage the clusters (power on, off, set offline, online, stop the scheduler, torn on/off locator leds, acknowledge events in the monitoring) based on a selection of nodes (onfline, offline, down, worker nodes, master nodes, storage)  it works toghether with pbs and vsc-quattor to get cluster information.
 
 installation: change into the directory where you checked this out, and run:

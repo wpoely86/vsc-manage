@@ -1,5 +1,5 @@
-##
-# Copyright 2011-2015 Ghent University
+#
+# Copyright 2011-2016 Ghent University
 #
 # This file is part of vsc-manage,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -8,7 +8,7 @@
 # the Hercules foundation (http://www.herculesstichting.be/in_English)
 # and the Department of Economy, Science and Innovation (EWI) (http://www.ewi-vlaanderen.be/en).
 #
-# http://github.com/hpcugent/vsc-manage
+# https://github.com/hpcugent/vsc-manage
 #
 # vsc-manage is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 # You should have received a copy of the GNU General Public License
 # along with vsc-manage.  If not, see <http://www.gnu.org/licenses/>.
 #
-##
 """
 This module provides the option and config parsing for manage
 """
@@ -86,6 +85,11 @@ def parseoptions():
 
 def get_config(name=None):
     """Returns the global config dict"""
+    if OPTIONS is None:
+        # the options needs to be parsed at least once
+        # before get_config can be successfully ran
+        parseoptions()
+
     global CONFIG
     if name is not None:
         try:
@@ -110,6 +114,10 @@ def get_config(name=None):
 
 def get_options():
     """Return the global options object"""
+    if OPTIONS is None:
+        # the options needs to be parsed at least once
+        parseoptions()
+
     return OPTIONS
 
 
@@ -274,7 +282,3 @@ class ManageOptionParser(GeneralOption):
                      None, "store_true", False),
         }
         self.add_group_parser(monitoringgroup, descr)
-
-
-# the options needs to be parsed before get_config can be successfully ran
-parseoptions()

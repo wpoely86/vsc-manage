@@ -30,36 +30,16 @@ vsc-manage distribution setup.py
 
 @author: Jens Timmerman <jens.timmerman@ugent.be>
 """
-try:
-    import vsc.install.shared_setup as shared_setup
-    from vsc.install.shared_setup import jt
-except ImportError:
-    print "vsc.install could not be found, make sure a recent vsc-base is installed"
-    print "you might want to try 'easy_install [--user] https://github.com/hpcugent/vsc-base/archive/master.tar.gz'"
-
-
-def remove_bdist_rpm_source_file():
-    """List of files to remove from the (source) RPM."""
-    return ['lib/vsc/__init__.py']
-
-
-shared_setup.remove_extra_bdist_rpm_files = remove_bdist_rpm_source_file
-shared_setup.SHARED_TARGET.update({
-    'url': 'https://github.ugent.be/hpcugent/vsc-manage',
-    'download_url': 'https://github.ugent.be/hpcugent/vsc-manage'
-})
-
+import vsc.install.shared_setup as shared_setup
+from vsc.install.shared_setup import jt
 
 PACKAGE = {
-    'name': 'vsc-manage',
     'version': '1.7.4',
     'author': [jt],
     'maintainer': [jt],
-    'packages': ['vsc', 'vsc.manage'],
-    'namespace_packages': ['vsc'],
-    'scripts': ['bin/misty.py'],
     'data_files': [('/etc', ['config/manage_defaults.cfg'])],
     'install_requires': [
+        'vsc-base >= 2.4.16',
         'paramiko',
         'pycrypto >= 1.9',
     ],

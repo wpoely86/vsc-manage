@@ -1,7 +1,13 @@
 *.py[cod]
 
+*.pyc
+*.pyo
+*~
+
 # C extensions
 *.so
+
+setup.cfg
 
 # Packages
 *.egg
