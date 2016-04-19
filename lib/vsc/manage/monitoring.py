@@ -5,7 +5,7 @@
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
 # with support of Ghent University (http://ugent.be/hpc),
 # the Flemish Supercomputer Centre (VSC) (https://vscentrum.be/nl/en),
-# the Hercules foundation (http://www.herculesstichting.be/in_English)
+# the Flemish Research Foundation (FWO) (http://www.fwo.be/en)
 # and the Department of Economy, Science and Innovation (EWI) (http://www.ewi-vlaanderen.be/en).
 #
 # https://github.com/hpcugent/vsc-manage
@@ -107,9 +107,9 @@ class Icinga(Monitoring):
                                 get_config("ICINGA_SOCKET"))
                                 )
         command = ";".join(commands)
-
+        command = "sudo sh -c '%s'" % command
         self.log.debug("creating command %s" % command)
-        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=6)
+        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), port=22, timeout=6)
         self._adcommand(command)
 
         return True
@@ -147,8 +147,9 @@ class Icinga(Monitoring):
                 }, get_config("ICINGA_SOCKET")))
 
         command = ";".join(commands)
+        command = "sudo sh -c '%s'" % command
         self.log.debug("creating command %s" % command)
-        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=6)
+        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), port=22, timeout=6)
         self._adcommand(command)
 
     def acknowledgeService(self, servicename, comment=None):
@@ -185,6 +186,7 @@ class Icinga(Monitoring):
                 }
                 commands.append('echo "%s" > %s' % (ack_command, get_config("ICINGA_SOCKET")))
         command = ";".join(commands)
+        command = "sudo sh -c '%s'" % command
         self.log.debug("creating command %s" % command)
-        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), user="root", port=22, timeout=6)
+        command = SshCommand(command=command, host=get_config("ICINGA_HOST"), port=22, timeout=6)
         self._adcommand(command)

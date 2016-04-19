@@ -5,7 +5,7 @@
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
 # with support of Ghent University (http://ugent.be/hpc),
 # the Flemish Supercomputer Centre (VSC) (https://vscentrum.be/nl/en),
-# the Hercules foundation (http://www.herculesstichting.be/in_English)
+# the Flemish Research Foundation (FWO) (http://www.fwo.be/en)
 # and the Department of Economy, Science and Innovation (EWI) (http://www.ewi-vlaanderen.be/en).
 #
 # https://github.com/hpcugent/vsc-manage
@@ -31,6 +31,7 @@ from config import get_config
 from subprocess import Popen, PIPE
 from vsc.utils import fancylogger
 import datetime
+import getpass
 import os
 import re
 import signal
@@ -198,7 +199,10 @@ class NetWorkCommand(Command):
         Command.__init__(self, command, timeout)
         self.port = port
         self.host = host
-        self.user = user
+        if user:
+            self.user = user
+        else:
+            self.user = getpass.getuser()
         self.passwd = passwd
         self.timeout = int(timeout)
 
@@ -251,12 +255,11 @@ class SshCommand(NetWorkCommand):
             buff.seek(0)
             return stdin, stdout, buff, 256
 
-    def __init__(self, command=None, host=None, user="root", port=22, timeout=get_config("COMMAND_TIMEOUT"),
+    def __init__(self, command=None, host=None, user=None, port=22, timeout=get_config("COMMAND_TIMEOUT"),
                  passwd=None):
         """
         constructor
         """
-        # self.command = 'ssh -p %s -l %s %s "%s"' % (self.port, self.user, self.host, command)
         NetWorkCommand.__init__(self, command, host, user, passwd, port, timeout)
 
     def run(self):
@@ -497,8 +500,8 @@ class FixDownOnErrorCommand(SshCommand):
     - remove healthscript.error file on node
     """
     def __init__(self, hostname):
-        SshCommand.__init__(self, command='momctl -q clearmsg && /bin/rm -f /var/tmp/healthscript.error',
-                            host=hostname, user='root')
+        SshCommand.__init__(self, command='sudo momctl -q clearmsg && sudo /bin/rm -f /var/tmp/healthscript.error',
+                            host=hostname)
 
 
 # master commands
@@ -589,7 +592,7 @@ class PBSStateCommand(SshCommand):
         """
         constructor
         """
-        SshCommand.__init__(self, command="pbsnodes | grep -v 'status\|jobs'", host=host, user='root', timeout=timeout)
+        SshCommand.__init__(self, command="sudo pbsnodes | grep -v 'status\|jobs'", host=host, timeout=timeout)
         self.masternode = host
 
     def run(self):
@@ -613,7 +616,7 @@ class MoabPauseCommand(SshCommand):
     pauses moab
     """
     def __init__(self, host, timeout=get_config("COMMAND_TIMEOUT")):
-        SshCommand.__init__(self, command='mschedctl -p', host=host, user='root', timeout=timeout)
+        SshCommand.__init__(self, command='sudo mschedctl -p', host=host, timeout=timeout)
 
 
 class MoabResumeCommand(SshCommand):
@@ -621,7 +624,7 @@ class MoabResumeCommand(SshCommand):
     resumes moab
     """
     def __init__(self, host, timeout=get_config("COMMAND_TIMEOUT")):
-        SshCommand.__init__(self, command='mschedctl -r', host=host, user='root', timeout=timeout)
+        SshCommand.__init__(self, command='sudo mschedctl -r', host=host, timeout=timeout)
 
 
 class MoabRestartCommand(SshCommand):
@@ -629,7 +632,7 @@ class MoabRestartCommand(SshCommand):
     restarts moab
     """
     def __init__(self, host, timeout=get_config("COMMAND_TIMEOUT")):
-        SshCommand.__init__(self, command='mschedctl -R', host=host, user='root', timeout=timeout)
+        SshCommand.__init__(self, command='sudo mschedctl -R', host=host, timeout=timeout)
 
 # IMM's
 
