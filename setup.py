@@ -34,7 +34,7 @@ import vsc.install.shared_setup as shared_setup
 from vsc.install.shared_setup import jt
 
 PACKAGE = {
-    'version': '1.9.0',
+    'version': '1.9.1',
     'author': [jt],
     'maintainer': [jt],
     'data_files': [('/etc', ['config/manage_defaults.cfg'])],
