@@ -553,7 +553,7 @@ class SetOnlineMasterCommand(MasterCommand):
         """
         constructor
         """
-        MasterCommand.__init__(self, master, nodelist, "pbsnodes -c %s ")
+        MasterCommand.__init__(self, master, nodelist, "sudo pbsnodes -c %s ")
 
 
 class SetOfflineMasterCommand(MasterCommand):
@@ -566,7 +566,7 @@ class SetOfflineMasterCommand(MasterCommand):
         """
         constructor
         """
-        MasterCommand.__init__(self, master, nodelist, "pbsnodes -o %s ")
+        MasterCommand.__init__(self, master, nodelist, "sudo pbsnodes -o %s ")
 
 
 # custom commands
